@@ -8,13 +8,12 @@ namespace CapiControls.Controllers
 {
     public class GroupController : Controller
     {
-        private readonly IRepository<Group> repository;
+        private readonly IGroupRepository repository;
 
-        public GroupController(IRepository<Group> repository)
+        public GroupController(IGroupRepository repository)
         {
             this.repository = repository;
         }
-            
 
         public IActionResult Index(int page = 1)
         {

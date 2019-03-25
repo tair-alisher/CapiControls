@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace CapiControls.Data.Repositories.Local
 {
-    public class QuestionnaireRepository : BaseRepository, IRepository<Questionnaire>
+    public class QuestionnaireRepository : BaseRepository, IQuestionnaireRepository
     {
         public QuestionnaireRepository(IConfiguration configuration) : base(configuration, "local.main") { }
 
@@ -18,7 +18,7 @@ namespace CapiControls.Data.Repositories.Local
             {
                 item.Id = Guid.NewGuid();
                 connection.Execute(
-                    "INSERT INTO main.questionnaires (id, group_id, title) VALUES(@Id, @GroupId, @Title)",
+                    "INSERT INTO main.questionnaires (id, group_id, identifier, title) VALUES(@Id, @GroupId, @Identifier, @Title)",
                     item
                 );
             }
@@ -32,14 +32,34 @@ namespace CapiControls.Data.Repositories.Local
                     SELECT
                         quest.id as Id
                         , quest.group_id as GroupId
-                        , group.title as Group
+                        , group_t.title as Group
+                        , quest.identifier as Identifier
                         , quest.title as Title
                     FROM main.questionnaires as quest
-                    JOIN main.groups as group ON quest.group_id = group.id
-                    WHERE id = @id
+                    JOIN main.groups as group_t ON quest.group_id = group_t.id
+                    WHERE quest.id = @id
                 ";
 
                 return connection.Query<Questionnaire>(query, new { id }).FirstOrDefault();
+            }
+        }
+
+        public IEnumerable<Questionnaire> GetAll()
+        {
+            using (var connection = Connection)
+            {
+                string query = @"
+                    SELECT
+                        quest.id as Id
+                        , quest.group_id as GroupId
+                        , group.title as Group
+                        , quest.identifier as Identifier
+                        , quest.title as Title
+                    FROM main.questionnaires as quest
+                    JOIN main.groups as group ON quest.group_id = group.id
+                ";
+
+                return connection.Query<Questionnaire>(query).ToList();
             }
         }
 
@@ -52,10 +72,10 @@ namespace CapiControls.Data.Repositories.Local
                     SELECT
                         quest.id as Id
                         , quest.group_id as GroupId
-                        , group.title as Group
+                        , group_t.title as Group
                         , quest.title as Title
                     FROM main.questionnaires as quest
-                    JOIN main.groups as group ON quest.group_id = group.id
+                    JOIN main.groups as group_t ON quest.group_id = group_t.id
                     OFFSET @Offset
                     LIMIT @Limit
                 ";
@@ -69,7 +89,7 @@ namespace CapiControls.Data.Repositories.Local
             using (var connection = Connection)
             {
                 connection.Execute(
-                    "UPDATE main.questionnaires SET group_id = @GroupId, title = @Title where id = @Id",
+                    "UPDATE main.questionnaires SET group_id = @GroupId, identifier = @Identifier, title = @Title where id = @Id",
                     item
                 );
             }

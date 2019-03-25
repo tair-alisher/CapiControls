@@ -7,9 +7,8 @@ namespace CapiControls.Data.Interfaces
     {
         void Create(T item);
         T Get(Guid id);
-        IEnumerable<T> GetAll(int itemsPerPage, int page);
+        IEnumerable<T> GetAll();
         void Update(T item);
         void Delete(Guid id);
-        int CountAll();
     }
 }

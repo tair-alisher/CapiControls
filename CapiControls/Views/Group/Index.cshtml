@@ -26,9 +26,15 @@
                 @Html.DisplayFor(modelItem => item.Title)
             </td>
             <td>
-                <a asp-controller="Group" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a> |
-                <a asp-controller="Group" asp-action="Details" asp-route-id="@item.Id">Подробнее</a> |
-                <a asp-controller="Group" asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
+                <a asp-controller="Group"
+                   asp-action="Edit"
+                   asp-route-id="@item.Id">Редактировать</a> |
+                <a asp-controller="Group"
+                   asp-action="Details"
+                   asp-route-id="@item.Id">Подробнее</a> |
+                <a asp-controller="Group"
+                   asp-action="Delete"
+                   asp-route-id="@item.Id">Удалить</a>
         </tr>
 }
     </tbody>
@@ -41,7 +47,7 @@
 }
 @if (Model.PageViewModel.HasNextPage)
 {
-    <a asp-action="Index"
-       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
-       class="btn btn-secondary">Вперед</a>
+<a asp-action="Index"
+   asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+   class="btn btn-secondary">Вперед</a>
 }

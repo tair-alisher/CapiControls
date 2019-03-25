@@ -4,12 +4,11 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 
 namespace CapiControls.Data.Repositories.Local
 {
-    public class GroupRepository : BaseRepository, IRepository<Group>
+    public class GroupRepository : BaseRepository, IGroupRepository
     {
         public GroupRepository(IConfiguration configuration) : base(configuration, "local.main") { }
 
@@ -30,6 +29,14 @@ namespace CapiControls.Data.Repositories.Local
                     "SELECT id as Id, title as Title FROM main.groups WHERE id = @id",
                     new { id }
                 ).FirstOrDefault();
+            }
+        }
+
+        public IEnumerable<Group> GetAll()
+        {
+            using (var connection = Connection)
+            {
+                return connection.Query<Group>("SELECT id as Id, title as Title FROM main.groups").ToList();
             }
         }
 

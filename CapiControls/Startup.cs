@@ -32,8 +32,8 @@ namespace CapiControls
 
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddTransient<IInterviewRepository, InterviewRepository>();
-            services.AddTransient<IRepository<Questionnaire>, QuestionnaireRepository>();
-            services.AddTransient<IRepository<Group>, GroupRepository>();
+            services.AddTransient<IQuestionnaireRepository, QuestionnaireRepository>();
+            services.AddTransient<IGroupRepository, GroupRepository>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

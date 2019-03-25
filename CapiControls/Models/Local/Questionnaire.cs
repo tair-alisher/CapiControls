@@ -9,6 +9,7 @@ namespace CapiControls.Models.Local
         public Guid Id { get; set; }
         public Guid GroupId { get; set; }
         public string Group { get; set; }
+        public string Identifier { get; set; }
         public string Title { get; set; }
     }
 }

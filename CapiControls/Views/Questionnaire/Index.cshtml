@@ -1,0 +1,62 @@
+﻿@using CapiControls.Models.Local
+@model CapiControls.ViewModels.IndexViewModel<Questionnaire>
+
+@{
+    ViewData["Title"] = "Опросники";
+}
+
+<h1>Опросники</h1>
+
+<p>
+    <a asp-action="Create">Добавить опросник</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.First().Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.First().Group)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Group)
+                </td>
+                <td>
+                    <a asp-controller="Questionnaire"
+                       asp-action="Edit"
+                       asp-route-id="@item.Id">Редактировать</a> |
+                    <a asp-controller="Questionnaire"
+                       asp-action="Details"
+                       asp-route-id="@item.Id">Подробнее</a> |
+                    <a asp-controller="Questionnaire"
+                       asp-action="Delete"
+                       asp-route-id="@item.Id">Удалить</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (Model.PageViewModel.HasPreviousPage)
+{
+<a asp-action="Index"
+   asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+   class="btn btn-secondary">Назад</a>
+}
+@if (Model.PageViewModel.HasNextPage)
+{
+<a asp-action="Index"
+   asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+   class="btn btn-secondary">Вперед</a>
+}
+
