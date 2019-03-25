@@ -7,24 +7,24 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-namespace CapiControls.Data.Repositories
+namespace CapiControls.Data.Repositories.Server
 {
     public class InterviewRepository : BaseRepository, IInterviewRepository
     {
-        private readonly IConfiguration configuration;
+        //private readonly IConfiguration configuration;
 
-        public InterviewRepository(IConfiguration configuration)
-        {
-            this.configuration = configuration;
-        }
+        //public InterviewRepository(IConfiguration configuration) =>
+        //    this.configuration = configuration;
 
-        public override IDbConnection Connection
-        {
-            get
-            {
-                return new NpgsqlConnection(configuration.GetConnectionString("server.readside"));
-            }
-        }
+        //public override IDbConnection Connection
+        //{
+        //    get
+        //    {
+        //        return new NpgsqlConnection(configuration.GetConnectionString("server.readside"));
+        //    }
+        //}
+
+        public InterviewRepository(IConfiguration configuration) : base(configuration, "server.readside") { }
 
         public List<Interview> GetInterviewsByQuestionnaire(string questionnaireId, int offset, int limit)
         {
@@ -79,6 +79,7 @@ namespace CapiControls.Data.Repositories
                 offset @_offset
                 limit @_limit
                 ";
+
             IEnumerable<RawInterviewData> rawData = Enumerable.Empty<RawInterviewData>();
             using (IDbConnection connection = Connection)
             {

@@ -1,5 +1,7 @@
 ﻿using CapiControls.Data.Interfaces;
-using CapiControls.Data.Repositories;
+using CapiControls.Data.Repositories.Local;
+using CapiControls.Data.Repositories.Server;
+using CapiControls.Models.Local;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +32,8 @@ namespace CapiControls
 
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddTransient<IInterviewRepository, InterviewRepository>();
+            services.AddTransient<IRepository<Questionnaire>, QuestionnaireRepository>();
+            services.AddTransient<IRepository<Group>, GroupRepository>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

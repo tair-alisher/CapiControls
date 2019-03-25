@@ -16,7 +16,9 @@
 
 
   <ItemGroup>
-    <Folder Include="Models\Local\" />
+    <Folder Include="Services\Interfaces\" />
+    <Folder Include="Services\Server\" />
+    <Folder Include="Services\Local\" />
   </ItemGroup>
 
 </Project>
