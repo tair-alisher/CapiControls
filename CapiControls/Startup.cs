@@ -1,7 +1,11 @@
-﻿using CapiControls.Data.Interfaces;
+﻿using CapiControls.Controls;
+using CapiControls.Controls.Interfaces;
+using CapiControls.Data.Interfaces;
 using CapiControls.Data.Repositories.Local;
 using CapiControls.Data.Repositories.Server;
 using CapiControls.Models.Local;
+using CapiControls.Services.Interfaces;
+using CapiControls.Services.Local;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,10 +34,17 @@ namespace CapiControls
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            // Repositories
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddTransient<IInterviewRepository, InterviewRepository>();
             services.AddTransient<IQuestionnaireRepository, QuestionnaireRepository>();
             services.AddTransient<IGroupRepository, GroupRepository>();
+
+            // Services
+            services.AddTransient<IControlService, ControlService>();
+
+            // Controls
+            services.AddTransient<IF3R1UnitsControl, F3R1UnitsControl>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

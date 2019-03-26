@@ -11,70 +11,67 @@ namespace CapiControls.Data.Repositories.Server
 {
     public class InterviewRepository : BaseRepository, IInterviewRepository
     {
-        //private readonly IConfiguration configuration;
-
-        //public InterviewRepository(IConfiguration configuration) =>
-        //    this.configuration = configuration;
-
-        //public override IDbConnection Connection
-        //{
-        //    get
-        //    {
-        //        return new NpgsqlConnection(configuration.GetConnectionString("server.readside"));
-        //    }
-        //}
 
         public InterviewRepository(IConfiguration configuration) : base(configuration, "server.readside") { }
 
+        private string BaseQuery
+        {
+            get
+            {
+                return @"
+                    select
+                        summary.summaryid as InterviewId
+                        , summary.questionnaireidentity as QuestionnaireId
+                        , question_entity.stata_export_caption as QuestionCode
+                        , cast(question_entity.parentid as varchar) as QuestionSection
+                        , interview.rostervector as QuestionSectionSuffix
+                        , coalesce(
+                            interview.asstring
+                            , cast(interview.asint as varchar)
+                            , cast(interview.aslong as varchar)
+                            , cast(interview.asdouble as varchar)
+                            , cast(interview.asdatetime as varchar)
+                            , cast(interview.aslist as varchar)
+                            , cast(interview.asbool as varchar)
+                            , cast(interview.asintarray as varchar)
+                            , cast(interview.asintmatrix as varchar)
+                            , cast(interview.asgps as varchar)
+                            , cast(interview.asyesno as varchar)
+                            , cast(interview.asaudio as varchar)
+                            , cast(interview.asarea as varchar)
+                            , @no_answer
+                        ) as Answer
+                    from
+                        readside.interviews as interview
+                        join
+                            readside.interviews_id as interview_id
+                        on
+                            interview.interviewid = interview_id.id
+                        join
+                            readside.interviewsummaries as summary
+                        on
+                            interview_id.interviewid = summary.interviewid
+                        join
+                            readside.questionnaire_entities as question_entity
+                        on
+                            interview.entityid = question_entity.id
+                        join
+                            readside.interviewcommentaries as interview_info
+                        on
+                            summary.summaryid = interview_info.id
+                    where
+                        question_entity.stata_export_caption is not null
+                        and interview_info.isdeleted = false
+                        and interview_info.isapprovedbyhq = false
+                        and summary.wasrejectedbysupervisor = false
+                        and summary.questionnaireidentity = @questionnaire_id
+                ";
+            }
+        }
+
         public List<Interview> GetInterviewsByQuestionnaire(string questionnaireId, int offset, int limit)
         {
-            string query = @"
-                select
-                    summary.summaryid as InterviewId
-                    , summary.questionnaireidentity as QuestionnaireId
-                    , question_entity.stata_export_caption as QuestionCode
-                    , cast(question_entity.parentid as varchar) as QuestionSection
-                    , interview.rostervector as QuestionSectionSuffix
-                    , coalesce(
-                        interview.asstring
-                        , cast(interview.asint as varchar)
-                        , cast(interview.aslong as varchar)
-                        , cast(interview.asdouble as varchar)
-                        , cast(interview.asdatetime as varchar)
-                        , cast(interview.aslist as varchar)
-                        , cast(interview.asbool as varchar)
-                        , cast(interview.asintarray as varchar)
-                        , cast(interview.asintmatrix as varchar)
-                        , cast(interview.asgps as varchar)
-                        , cast(interview.asyesno as varchar)
-                        , cast(interview.asaudio as varchar)
-                        , cast(interview.asarea as varchar)
-                        , @no_answer
-                    ) as Answer
-                from
-                    readside.interviews as interview
-                    join
-                        readside.interviews_id as interview_id
-                    on
-                        interview.interviewid = interview_id.id
-                    join
-                        readside.interviewsummaries as summary
-                    on
-                        interview_id.interviewid = summary.interviewid
-                    join
-                        readside.questionnaire_entities as question_entity
-                    on
-                        interview.entityid = question_entity.id
-                    join
-                        readside.interviewcommentaries as interview_info
-                    on
-                        summary.summaryid = interview_info.id
-                where
-                    question_entity.stata_export_caption is not null
-                    and interview_info.isdeleted = false
-                    and interview_info.isapprovedbyhq = false
-                    and summary.wasrejectedbysupervisor = false
-                    and summary.questionnaireidentity = @questionnaire_id
+            string query = BaseQuery + @"
                 order by interview_id
                 offset @_offset
                 limit @_limit
@@ -92,6 +89,11 @@ namespace CapiControls.Data.Repositories.Server
                 });
             }
 
+            return CollectInterviews(rawData);
+        }
+
+        private List<Interview> CollectInterviews(IEnumerable<RawInterviewData> rawData)
+        {
             List<Interview> interviews = new List<Interview>();
             Interview interview = null;
             QuestionData questionData = null;
@@ -134,6 +136,110 @@ namespace CapiControls.Data.Repositories.Server
             }
 
             return interviews;
+        }
+
+        public List<Interview> GetInterviewsByQuestionnaireAndQuestionCode(string questionnaireId, string questionCode, int offset, int limit)
+        {
+            string query = BaseQuery + @"
+                        and question_entity.stata_export_caption = @question_code
+                    order by interview_id
+                    offset @_offset
+                    limit @limit
+                ";
+
+            IEnumerable<RawInterviewData> rawData = Enumerable.Empty<RawInterviewData>();
+            using (var connection = Connection)
+            {
+                rawData = connection.Query<RawInterviewData>(query, new
+                {
+                    no_answer = "",
+                    questionnaire_id = questionnaireId,
+                    question_code = questionCode,
+                    _offset = offset,
+                    _limit = limit
+                });
+            }
+
+            return CollectInterviews(rawData);
+        }
+
+        public List<Interview> GetF1R3InterviewsByQuestionnaire(string questionnaireId, int offset, int limit)
+        {
+            string query = BaseQuery + @"
+                        and (question_entity.stata_export_caption = 'f3r1q6'
+                            or question_entity.stata_export_caption = 'tovKod')
+                    order by interview_id
+                    offset @_offset
+                    limit @_limit
+                ";
+
+            IEnumerable<RawInterviewData> rawData = Enumerable.Empty<RawInterviewData>();
+            using (var connection = Connection)
+            {
+                rawData = connection.Query<RawInterviewData>(query, new
+                {
+                    no_answer = "",
+                    questionnaire_id = questionnaireId,
+                    _offset = offset,
+                    _limit = limit
+                });
+            }
+
+            return CollectInterviews(rawData);
+        }
+
+        public string GetQuestionAnswer(string interviewId, string questionCode)
+        {
+            string query = @"
+                    select
+                        coalesce(
+                            interview.asstring
+                            , cast(interview.asint as varchar)
+                            , cast(interview.aslong as varchar)
+                            , cast(interview.asdouble as varchar)
+                            , cast(interview.asdatetime as varchar)
+                            , cast(interview.aslist as varchar)
+                            , cast(interview.asbool as varchar)
+                            , cast(interview.asintarray as varchar)
+                            , cast(interview.asintmatrix as varchar)
+                            , cast(interview.asgps as varchar)
+                            , cast(interview.asyesno as varchar)
+                            , cast(interview.asaudio as varchar)
+                            , cast(interview.asarea as varchar)
+                            , @no_answer
+                        ) as Answer
+                    from
+                        readside.interviews as interview
+                        join
+                            readside.interviews_id as interview_id
+                        on
+                            interview.interviewid = interview_id.id
+                        join
+                            readside.interviewsummaries as summary
+                        on
+                            interview_id.interviewid = summary.interviewid
+                        join
+                            readside.questionnaire_entities as question_entity
+                        on
+                            interview.entityid = question_entity.id
+                    where
+                        question_entity.stata_export_caption = @question_code
+                        and summary.interviewid = @interview_id
+                    limit 1
+                ";
+
+            string answer = "";
+            using (var connection = Connection)
+            {
+                answer = connection.Query<string>(query, new
+                {
+                    no_answer = "",
+                    question_code = questionCode,
+                    interview_id = interviewId
+                }).First();
+            }
+
+            return answer;
         }
     }
 }

@@ -52,11 +52,11 @@ namespace CapiControls.Data.Repositories.Local
                     SELECT
                         quest.id as Id
                         , quest.group_id as GroupId
-                        , group.title as Group
+                        , group_t.title as Group
                         , quest.identifier as Identifier
                         , quest.title as Title
                     FROM main.questionnaires as quest
-                    JOIN main.groups as group ON quest.group_id = group.id
+                    JOIN main.groups as group_t ON quest.group_id = group_t.id
                 ";
 
                 return connection.Query<Questionnaire>(query).ToList();
