@@ -1,11 +1,17 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Контроли";
 }
 
 <h1>Контроли</h1>
 
 <h4>Household</h4>
-<a asp-controller="Control" asp-action="F3R1Units">Форма 3. Раздел 1. Единицы измерения.</a>
+<ul class="list-group list-group-flush">
+    <li class="list-group-item">
+        <a asp-controller="F3Control" asp-action="F3R1Units">Форма 3. Раздел 1. Единицы измерения.</a>
+    </li>
+    <li class="list-group-item">
+        <a asp-controller="F3Control" asp-action="F3R2Units">Форма 3. Раздел 2. Единицы измерения.</a>
+    </li>
+</ul>
 
 <h4>Individual</h4>

@@ -2,6 +2,6 @@
 {
     public interface IControl
     {
-        void Execute(string questionnaireId);
+        string Execute(string questionnaireId);
     }
 }

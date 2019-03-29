@@ -7,7 +7,7 @@ namespace CapiControls.Data.Interfaces
     {
         List<Interview> GetInterviewsByQuestionnaire(string questionnaireId, int offset, int limit);
         List<Interview> GetInterviewsByQuestionnaireAndQuestionCode(string questionnaireId, string questionCode, int offset, int limit);
-        List<Interview> GetF1R3InterviewsByQuestionnaire(string questionnaireId, int offset, int limit);
-        string GetQuestionAnswer(string interviewId, string questionCode);
+        List<Interview> CollectInterviews(IEnumerable<RawInterviewData> rawData);
+        string GetQuestionAnswerBySection(string interviewId, string questionCode, string section);
     }
 }

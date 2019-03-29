@@ -2,7 +2,7 @@
 using CapiControls.Models.Server;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -14,7 +14,7 @@ namespace CapiControls.Data.Repositories.Server
 
         public InterviewRepository(IConfiguration configuration) : base(configuration, "server.readside") { }
 
-        private string BaseQuery
+        protected string BaseQuery
         {
             get
             {
@@ -92,7 +92,7 @@ namespace CapiControls.Data.Repositories.Server
             return CollectInterviews(rawData);
         }
 
-        private List<Interview> CollectInterviews(IEnumerable<RawInterviewData> rawData)
+        public List<Interview> CollectInterviews(IEnumerable<RawInterviewData> rawData)
         {
             List<Interview> interviews = new List<Interview>();
             Interview interview = null;
@@ -163,33 +163,10 @@ namespace CapiControls.Data.Repositories.Server
             return CollectInterviews(rawData);
         }
 
-        public List<Interview> GetF1R3InterviewsByQuestionnaire(string questionnaireId, int offset, int limit)
+        public string GetQuestionAnswerBySection(string interviewId, string questionCode, string section)
         {
-            string query = BaseQuery + @"
-                        and (question_entity.stata_export_caption = 'f3r1q6'
-                            or question_entity.stata_export_caption = 'tovKod')
-                    order by interview_id
-                    offset @_offset
-                    limit @_limit
-                ";
-
-            IEnumerable<RawInterviewData> rawData = Enumerable.Empty<RawInterviewData>();
-            using (var connection = Connection)
-            {
-                rawData = connection.Query<RawInterviewData>(query, new
-                {
-                    no_answer = "",
-                    questionnaire_id = questionnaireId,
-                    _offset = offset,
-                    _limit = limit
-                });
-            }
-
-            return CollectInterviews(rawData);
-        }
-
-        public string GetQuestionAnswer(string interviewId, string questionCode)
-        {
+            string sectionId = section.Split('_').Last();
+            section = section.Split('_').First();
             string query = @"
                     select
                         coalesce(
@@ -206,7 +183,7 @@ namespace CapiControls.Data.Repositories.Server
                             , cast(interview.asyesno as varchar)
                             , cast(interview.asaudio as varchar)
                             , cast(interview.asarea as varchar)
-                            , @no_answer
+                            , @noAnswer
                         ) as Answer
                     from
                         readside.interviews as interview
@@ -223,20 +200,24 @@ namespace CapiControls.Data.Repositories.Server
                         on
                             interview.entityid = question_entity.id
                     where
-                        question_entity.stata_export_caption = @question_code
-                        and summary.interviewid = @interview_id
+                        question_entity.stata_export_caption = @questionCode
+                        and summary.summaryid = @interviewId
+                        and question_entity.parentid = @section
+                        and interview.rostervector = @sectionId
                     limit 1
                 ";
 
             string answer = "";
             using (var connection = Connection)
             {
-                answer = connection.Query<string>(query, new
+                answer = connection.QueryFirst<string>(query, new
                 {
-                    no_answer = "",
-                    question_code = questionCode,
-                    interview_id = interviewId
-                }).First();
+                    noAnswer = "",
+                    questionCode,
+                    interviewId,
+                    section = new Guid(section),
+                    sectionId
+                });
             }
 
             return answer;

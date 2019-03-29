@@ -1,42 +1,21 @@
-﻿using CapiControls.Data.Interfaces;
-using CapiControls.Services.Interfaces;
+﻿using CapiControls.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CapiControls.Controllers
 {
-    public class ControlController : BaseController
+    public class ControlController : Controller
     {
-        private readonly IGroupRepository groupRepository;
-        private readonly IQuestionnaireRepository questRepository;
-        private readonly IControlService ControlService;
+        public string HouseholdTitle = "Household";
+        public string IndividualTitle = "Individual";
 
-        public ControlController(IGroupRepository groupRepo, IQuestionnaireRepository questRepo, IControlService controlService)
+        public ControlController(IFileService fileService)
         {
-            groupRepository = groupRepo;
-            questRepository = questRepo;
-            ControlService = controlService;
+            fileService.DeleteOldFiles();
         }
 
         public IActionResult Index()
         {
             return View();
-        }
-
-        [HttpGet]
-        public IActionResult F3R1Units()
-        {
-            var questionnaires = ControlService.GetQuestionnairesByGroupName(base.HouseholdTitle);
-            ViewBag.Questionnaires = new SelectList(questionnaires, "Identifier", "Title");
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult F3R1Units(string questionnaireId)
-        {
-            ControlService.ExecuteF3R1UnitsControl(questionnaireId);
-
-            return RedirectToAction("Index");
         }
     }
 }

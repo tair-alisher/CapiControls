@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace CapiControls.Services.Interfaces
 {
-    public interface IControlService
+    public interface IF3ControlService
     {
         IEnumerable<Questionnaire> GetQuestionnairesByGroupName(string group);
-        void ExecuteF3R1UnitsControl(string questionnaireId);
+        string ExecuteF3R1UnitsControl(string questionnaireId);
+        string ExecuteF3R2UnitsControl(string questionnaireId);
     }
 }

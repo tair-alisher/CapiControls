@@ -1,9 +1,8 @@
-﻿using CapiControls.Controls;
+﻿using CapiControls.Controls.Form3;
 using CapiControls.Controls.Interfaces;
 using CapiControls.Data.Interfaces;
 using CapiControls.Data.Repositories.Local;
 using CapiControls.Data.Repositories.Server;
-using CapiControls.Models.Local;
 using CapiControls.Services.Interfaces;
 using CapiControls.Services.Local;
 using Microsoft.AspNetCore.Builder;
@@ -37,14 +36,17 @@ namespace CapiControls
             // Repositories
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddTransient<IInterviewRepository, InterviewRepository>();
+            services.AddTransient<IForm3Repository, Form3Repository>();
             services.AddTransient<IQuestionnaireRepository, QuestionnaireRepository>();
             services.AddTransient<IGroupRepository, GroupRepository>();
 
             // Services
-            services.AddTransient<IControlService, ControlService>();
+            services.AddTransient<IF3ControlService, F3ControlService>();
+            services.AddTransient<IFileService, FileService>();
 
             // Controls
             services.AddTransient<IF3R1UnitsControl, F3R1UnitsControl>();
+            services.AddTransient<IF3R2UnitsControl, F3R2UnitsControl>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -68,7 +70,7 @@ namespace CapiControls
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Control}/{action=Index}/{id?}");
             });
         }
     }
