@@ -33,8 +33,10 @@ namespace CapiControls
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            // Repositories
             services.AddSingleton<IConfiguration>(Configuration);
+            //services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            // Repositories
             services.AddTransient<IInterviewRepository, InterviewRepository>();
             services.AddTransient<IForm3Repository, Form3Repository>();
             services.AddTransient<IQuestionnaireRepository, QuestionnaireRepository>();
