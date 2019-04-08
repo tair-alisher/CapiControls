@@ -12,6 +12,8 @@ namespace CapiControls.Services.Interfaces
         IEnumerable<Role> GetRoles();
         void AddUser(RegisterViewModel userVM, Guid[] roles);
         bool UserExists(string login);
+        User GetUserById(Guid id);
         User GetUser(LoginViewModel model);
+        void UpdateUser(User user, Guid[] roles);
     }
 }

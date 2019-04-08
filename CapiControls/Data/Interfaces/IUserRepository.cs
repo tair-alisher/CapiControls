@@ -8,6 +8,7 @@ namespace CapiControls.Data.Interfaces
     {
         List<Role> GetRoles();
         void AddRoleToUser(Guid roleId, Guid userId);
+        void RemoveRoleFromUser(Guid roleId, Guid userId);
         bool UserExists(string login);
         User GetUserByLoginAndPassword(string login, string passwordHash);
     }

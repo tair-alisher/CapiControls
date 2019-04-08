@@ -168,7 +168,6 @@ namespace CapiControls.Data.Repositories.Local
                         user_t.id as Id,
                         user_t.login as Login,
                         user_t.username as UserName,
-                        user_t.password as Password,
                         role_t.id as RoleId,
                         role_t.name as RoleName,
                         role_t.title as RoleTitle
@@ -191,8 +190,7 @@ namespace CapiControls.Data.Repositories.Local
                     {
                         Id = rawUser.Id,
                         Login = rawUser.Login,
-                        UserName = rawUser.UserName,
-                        Password = rawUser.Password
+                        UserName = rawUser.UserName
                     });
                 }
             }
@@ -219,7 +217,7 @@ namespace CapiControls.Data.Repositories.Local
             using (var connection = Connection)
             {
                 connection.Execute(
-                    "UPDATE main.users SET login = @Login, username = @UserName, password = @Password WHERE id = @Id",
+                    "UPDATE main.users SET login = @Login, username = @UserName WHERE id = @Id",
                     item
                 );
             }
@@ -262,6 +260,14 @@ namespace CapiControls.Data.Repositories.Local
             using (var connection = Connection)
             {
                 connection.Execute("INSERT INTO main.userroles (id, user_id, role_id) VALUES(@id, @userId, @roleId)", new { id = Guid.NewGuid(), userId, roleId });
+            }
+        }
+
+        public void RemoveRoleFromUser(Guid roleId, Guid userId)
+        {
+            using (var connection = Connection)
+            {
+                connection.Execute("DELETE FROM main.userroles WHERE user_id = @userId and role_id = @roleId", new { userId, roleId });
             }
         }
 

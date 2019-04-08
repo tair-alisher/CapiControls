@@ -61,5 +61,37 @@ namespace CapiControls.Controllers
 
             return View();
         }
+
+        [Authorize(Policy = "IsAdministrator")]
+        public IActionResult Details(Guid id)
+        {
+            var user = UserService.GetUserById(id);
+
+            return View(user);
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "IsAdministrator")]
+        public IActionResult Edit(Guid id)
+        {
+            ViewBag.Roles = UserService.GetRoles();
+            var user = UserService.GetUserById(id);
+
+            return View(user);
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "IsAdministrator")]
+        public IActionResult Edit(User user, Guid[] roles)
+        {
+            if (ModelState.IsValid)
+            {
+                UserService.UpdateUser(user, roles);
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Roles = UserService.GetRoles();
+            return View(user);
+        }
     }
 }

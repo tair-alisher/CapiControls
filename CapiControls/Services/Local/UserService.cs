@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using CapiControls.Data.Interfaces;
 using CapiControls.Models.Local.Account;
@@ -35,6 +36,23 @@ namespace CapiControls.Services.Local
 
             foreach (Guid roleId in roles)
                 UserRepository.AddRoleToUser(roleId, user.Id);
+        }
+
+        public void UpdateUser(User user, Guid[] roles)
+        {
+            var userToUpdate = GetUserById(user.Id);
+            userToUpdate.Login = user.Login;
+            userToUpdate.UserName = user.UserName;
+
+            UserRepository.Update(userToUpdate);
+
+            foreach (Guid roleId in roles)
+                if (userToUpdate.Roles.Where(r => r.Id == roleId).Count() <= 0)
+                    UserRepository.AddRoleToUser(roleId, userToUpdate.Id);
+
+            foreach (var role in userToUpdate.Roles)
+                if (!roles.Contains(role.Id))
+                    UserRepository.RemoveRoleFromUser(role.Id, userToUpdate.Id);
         }
 
         public int CountUsers()
@@ -73,6 +91,11 @@ namespace CapiControls.Services.Local
                 prf: KeyDerivationPrf.HMACSHA1,
                 iterationCount: 10000,
                 numBytesRequested: 256 / 8));
+        }
+
+        public User GetUserById(Guid id)
+        {
+            return UserRepository.Get(id);
         }
     }
 }
