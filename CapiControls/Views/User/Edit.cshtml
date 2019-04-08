@@ -4,10 +4,10 @@
     ViewData["Title"] = "Редактировать данные";
 }
 
-<h1>Редактировать данные</h1>
-
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 mx-auto">
+        <h4>Редактировать данные</h4>
+        <hr />
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -31,10 +31,11 @@
                 <input type="submit" value="Сохранить" class="btn btn-primary" />
             </div>
         </form>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">Назад</a>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index" class="btn btn-secondary">Назад</a>
-</div>
+
 

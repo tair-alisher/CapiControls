@@ -7,6 +7,7 @@ namespace CapiControls.Models.Local
     {
         [Key]
         public Guid Id { get; set; }
+        [Display(Name = "Наименование")]
         public string Title { get; set; }
     }
 }
