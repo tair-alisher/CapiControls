@@ -15,5 +15,6 @@ namespace CapiControls.Services.Interfaces
         User GetUserById(Guid id);
         User GetUser(LoginViewModel model);
         void UpdateUser(User user, Guid[] roles);
+        void DeleteUser(Guid id);
     }
 }

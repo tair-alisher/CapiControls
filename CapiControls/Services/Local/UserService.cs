@@ -97,5 +97,10 @@ namespace CapiControls.Services.Local
         {
             return UserRepository.Get(id);
         }
+
+        public void DeleteUser(Guid id)
+        {
+            UserRepository.Delete(id);
+        }
     }
 }

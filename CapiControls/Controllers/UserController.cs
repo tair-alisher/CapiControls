@@ -93,5 +93,13 @@ namespace CapiControls.Controllers
             ViewBag.Roles = UserService.GetRoles();
             return View(user);
         }
+
+        [Authorize(Policy = "IsAdministrator")]
+        public IActionResult Delete(Guid id)
+        {
+            UserService.DeleteUser(id);
+
+            return RedirectToAction("Index");
+        }
     }
 }
