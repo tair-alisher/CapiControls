@@ -1,6 +1,7 @@
 ﻿using CapiControls.Data.Interfaces;
 using CapiControls.Models.Local;
 using CapiControls.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
@@ -8,13 +9,14 @@ namespace CapiControls.Controllers
 {
     public class GroupController : Controller
     {
-        private readonly IGroupRepository repository;
+        private readonly IPaginatedRepository<Group> repository;
 
-        public GroupController(IGroupRepository repository)
+        public GroupController(IPaginatedRepository<Group> repository)
         {
             this.repository = repository;
         }
 
+        [Authorize(Policy = "IsUser")]
         public IActionResult Index(int page = 1)
         {
             int pageSize = 10;
@@ -32,12 +34,14 @@ namespace CapiControls.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "IsUser")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Policy = "IsUser")]
         public IActionResult Create(Group group)
         {
             if (ModelState.IsValid)
@@ -49,6 +53,7 @@ namespace CapiControls.Controllers
             return View();
         }
 
+        [Authorize(Policy = "IsUser")]
         public IActionResult Details(Guid id)
         {
             var group = repository.Get(id);
@@ -56,6 +61,7 @@ namespace CapiControls.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "IsUser")]
         public IActionResult Edit(Guid id)
         {
             var group = repository.Get(id);
@@ -63,6 +69,7 @@ namespace CapiControls.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "IsUser")]
         public IActionResult Edit(Group group)
         {
             if (ModelState.IsValid)
@@ -75,6 +82,7 @@ namespace CapiControls.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "IsUser")]
         public IActionResult Delete(Guid id)
         {
             if (repository.Get(id) != null)

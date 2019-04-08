@@ -4,12 +4,10 @@
     ViewData["Title"] = "Добавить опросник";
 }
 
-<h1>Добавить опросник</h1>
-
-<h4>Опросник</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 mx-auto">
+        <h4>Добавить опросник</h4>
+        <hr />
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -34,13 +32,8 @@
                 <input type="submit" value="Добавить" class="btn btn-primary" />
             </div>
         </form>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Назад к списку</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
