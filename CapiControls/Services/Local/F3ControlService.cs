@@ -9,11 +9,11 @@ namespace CapiControls.Services.Local
 {
     public class F3ControlService : IF3ControlService
     {
-        private readonly IQuestionnaireRepository QuestRepository;
+        private readonly IPaginatedRepository<Questionnaire> QuestRepository;
         private readonly IF3R1UnitsControl F3R1UnitsControl;
         private readonly IF3R2UnitsControl F3R2UnitsControl;
 
-        public F3ControlService(IQuestionnaireRepository questRepository, IF3R1UnitsControl f3r1unitsControl, IF3R2UnitsControl f3r2unitsControl)
+        public F3ControlService(IPaginatedRepository<Questionnaire> questRepository, IF3R1UnitsControl f3r1unitsControl, IF3R2UnitsControl f3r2unitsControl)
         {
             QuestRepository = questRepository;
             F3R1UnitsControl = f3r1unitsControl;

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace CapiControls.Data.Repositories.Local
 {
-    public class QuestionnaireRepository : BaseRepository, IQuestionnaireRepository
+    public class QuestionnaireRepository : BaseRepository, IPaginatedRepository<Questionnaire>
     {
         public QuestionnaireRepository(IConfiguration configuration) : base(configuration, "local.main") { }
 
@@ -63,11 +63,11 @@ namespace CapiControls.Data.Repositories.Local
             }
         }
 
-        public IEnumerable<Questionnaire> GetAll(int itemsPerPage = 10, int page = 1)
+        public IEnumerable<Questionnaire> GetAll(int pageSize = 10, int page = 1)
         {
             using (var connection = Connection)
             {
-                int offset = (page - 1) * itemsPerPage;
+                int offset = (page - 1) * pageSize;
                 string query = @"
                     SELECT
                         quest.id as Id
@@ -80,7 +80,7 @@ namespace CapiControls.Data.Repositories.Local
                     LIMIT @Limit
                 ";
 
-                return connection.Query<Questionnaire>(query, new { Offset = offset, Limit = itemsPerPage }).ToList();
+                return connection.Query<Questionnaire>(query, new { Offset = offset, Limit = pageSize }).ToList();
             }
         }
 
@@ -89,7 +89,7 @@ namespace CapiControls.Data.Repositories.Local
             using (var connection = Connection)
             {
                 connection.Execute(
-                    "UPDATE main.questionnaires SET group_id = @GroupId, identifier = @Identifier, title = @Title where id = @Id",
+                    "UPDATE main.questionnaires SET group_id = @GroupId, identifier = @Identifier, title = @Title WHERE id = @Id",
                     item
                 );
             }

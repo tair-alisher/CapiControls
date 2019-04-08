@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace CapiControls.Data.Repositories.Local
 {
-    public class GroupRepository : BaseRepository, IGroupRepository
+    public class GroupRepository : BaseRepository, IPaginatedRepository<Group>
     {
         public GroupRepository(IConfiguration configuration) : base(configuration, "local.main") { }
 
@@ -56,7 +56,7 @@ namespace CapiControls.Data.Repositories.Local
             using (var connection = Connection)
             {
                 connection.Execute(
-                    "UPDATE main.groups SET title = @Title where id = @Id",
+                    "UPDATE main.groups SET title = @Title WHERE id = @Id",
                     item
                 );
             }

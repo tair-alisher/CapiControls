@@ -1,4 +1,5 @@
 ﻿using CapiControls.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CapiControls.Controllers
@@ -13,6 +14,7 @@ namespace CapiControls.Controllers
             fileService.DeleteOldFiles();
         }
 
+        [Authorize(Policy = "IsUser")]
         public IActionResult Index()
         {
             return View();

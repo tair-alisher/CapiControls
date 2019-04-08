@@ -3,8 +3,11 @@ using CapiControls.Controls.Interfaces;
 using CapiControls.Data.Interfaces;
 using CapiControls.Data.Repositories.Local;
 using CapiControls.Data.Repositories.Server;
+using CapiControls.Models.Local;
+using CapiControls.Models.Local.Account;
 using CapiControls.Services.Interfaces;
 using CapiControls.Services.Local;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,18 +42,34 @@ namespace CapiControls
             // Repositories
             services.AddTransient<IInterviewRepository, InterviewRepository>();
             services.AddTransient<IForm3Repository, Form3Repository>();
-            services.AddTransient<IQuestionnaireRepository, QuestionnaireRepository>();
-            services.AddTransient<IGroupRepository, GroupRepository>();
+            services.AddTransient<IPaginatedRepository<Questionnaire>, QuestionnaireRepository>();
+            services.AddTransient<IPaginatedRepository<Group>, GroupRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
 
             // Services
             services.AddTransient<IF3ControlService, F3ControlService>();
             services.AddTransient<IFileService, FileService>();
+            services.AddTransient<IUserService, UserService>();
 
             // Controls
             services.AddTransient<IF3R1UnitsControl, F3R1UnitsControl>();
             services.AddTransient<IF3R2UnitsControl, F3R2UnitsControl>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            // Authentication
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(
+                options => options.LoginPath = new PathString("/account/login")
+            );
+
+            // Authorization
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsAdministrator", policy => policy.RequireClaim("IS_ADMIN", "true"));
+                options.AddPolicy("IsUser", policy => policy.RequireClaim("IS_USER", "true"));
+            });
+
+            services.AddMvc(
+                options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute())
+            ).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +86,7 @@ namespace CapiControls
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
