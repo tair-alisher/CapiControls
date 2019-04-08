@@ -281,5 +281,13 @@ namespace CapiControls.Data.Repositories.Local
 
             return userCount > 0;
         }
+
+        public void UpdatePassword(Guid userId, string newPassword)
+        {
+            using (var connection = Connection)
+            {
+                connection.Execute("UPDATE main.users SET password = @newPassword WHERE id = @userId", new { userId, newPassword });
+            }
+        }
     }
 }

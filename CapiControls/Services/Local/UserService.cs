@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CapiControls.Data.Interfaces;
+using CapiControls.Exceptions;
 using CapiControls.Models.Local.Account;
 using CapiControls.Services.Interfaces;
 using CapiControls.ViewModels;
@@ -36,23 +37,6 @@ namespace CapiControls.Services.Local
 
             foreach (Guid roleId in roles)
                 UserRepository.AddRoleToUser(roleId, user.Id);
-        }
-
-        public void UpdateUser(User user, Guid[] roles)
-        {
-            var userToUpdate = GetUserById(user.Id);
-            userToUpdate.Login = user.Login;
-            userToUpdate.UserName = user.UserName;
-
-            UserRepository.Update(userToUpdate);
-
-            foreach (Guid roleId in roles)
-                if (userToUpdate.Roles.Where(r => r.Id == roleId).Count() <= 0)
-                    UserRepository.AddRoleToUser(roleId, userToUpdate.Id);
-
-            foreach (var role in userToUpdate.Roles)
-                if (!roles.Contains(role.Id))
-                    UserRepository.RemoveRoleFromUser(role.Id, userToUpdate.Id);
         }
 
         public int CountUsers()
@@ -98,9 +82,40 @@ namespace CapiControls.Services.Local
             return UserRepository.Get(id);
         }
 
+        public void UpdateUser(User user, Guid[] roles)
+        {
+            var userToUpdate = GetUserById(user.Id);
+            userToUpdate.Login = user.Login;
+            userToUpdate.UserName = user.UserName;
+
+            UserRepository.Update(userToUpdate);
+
+            foreach (Guid roleId in roles)
+                if (userToUpdate.Roles.Where(r => r.Id == roleId).Count() <= 0)
+                    UserRepository.AddRoleToUser(roleId, userToUpdate.Id);
+
+            foreach (var role in userToUpdate.Roles)
+                if (!roles.Contains(role.Id))
+                    UserRepository.RemoveRoleFromUser(role.Id, userToUpdate.Id);
+        }
+
         public void DeleteUser(Guid id)
         {
             UserRepository.Delete(id);
+        }
+
+        public void UpdatePassword(string login, ChangePasswordViewModel model)
+        {
+            string oldPasswordHash = HashPassword(model.OldPassword);
+            var user = UserRepository.GetUserByLoginAndPassword(login, oldPasswordHash);
+
+            if (user == null)
+                throw new WrongOldPasswordException();
+            else
+            {
+                string newPasswordHash = HashPassword(model.NewPassword);
+                UserRepository.UpdatePassword(user.Id, newPasswordHash);
+            }
         }
     }
 }

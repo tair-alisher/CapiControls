@@ -1,8 +1,11 @@
-﻿using CapiControls.Services.Interfaces;
+﻿using CapiControls.Exceptions;
+using CapiControls.Services.Interfaces;
 using CapiControls.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -66,6 +69,34 @@ namespace CapiControls.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                string login = HttpContext.User.FindFirst("Login").Value;
+                try
+                {
+                    UserService.UpdatePassword(login, model);
+                    return RedirectToAction("Index", "Control");
+                }
+                catch (WrongOldPasswordException)
+                {
+                    ModelState.AddModelError(string.Empty, "Старый пароль неверен.");
+                }
+            }
+
+            return View(model);
         }
     }
 }

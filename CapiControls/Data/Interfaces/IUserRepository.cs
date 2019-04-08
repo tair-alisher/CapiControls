@@ -11,5 +11,6 @@ namespace CapiControls.Data.Interfaces
         void RemoveRoleFromUser(Guid roleId, Guid userId);
         bool UserExists(string login);
         User GetUserByLoginAndPassword(string login, string passwordHash);
+        void UpdatePassword(Guid userId, string newPassword);
     }
 }
