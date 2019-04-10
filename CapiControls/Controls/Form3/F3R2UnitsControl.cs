@@ -1,9 +1,10 @@
 ﻿using CapiControls.Controls.Common;
 using CapiControls.Controls.Interfaces;
 using CapiControls.Data.Interfaces;
+using CapiControls.Models.Local;
 using Microsoft.AspNetCore.Hosting;
+using Novacode;
 using System;
-using System.IO;
 using System.Linq;
 
 namespace CapiControls.Controls.Form3
@@ -13,8 +14,9 @@ namespace CapiControls.Controls.Form3
         private readonly IForm3Repository Repository;
         private readonly IInterviewRepository InterviewRepo;
         private string _outputCsvFilePath;
+        private string _questionnaireTitle;
 
-        public F3R2UnitsControl(IForm3Repository repository, IInterviewRepository interviewRepo, IHostingEnvironment hostEnv) : base(hostEnv)
+        public F3R2UnitsControl(IForm3Repository repository, IInterviewRepository interviewRepo, IPaginatedRepository<Questionnaire> questionnaireRepo, IHostingEnvironment hostEnv) : base(questionnaireRepo, hostEnv)
         {
             Repository = repository;
             InterviewRepo = interviewRepo;
@@ -22,7 +24,8 @@ namespace CapiControls.Controls.Form3
 
         public string Execute(string questionnaireId)
         {
-            _outputCsvFilePath = CreateReportCsvFile("F3R2Units");
+            _outputCsvFilePath = CreateReportFile("F3R2Units");
+            _questionnaireTitle = GetQuestionnaireTitle(questionnaireId);
 
             Execute(questionnaireId, 0, 1000);
 
@@ -37,11 +40,13 @@ namespace CapiControls.Controls.Form3
 
             if (!(interviews.Count <= 0))
             {
-                using (var file = File.AppendText(_outputCsvFilePath))
+                using (var file = DocX.Load(_outputCsvFilePath))
                 {
                     string productCode;
                     string unit;
                     Product product;
+                    string hhCode;
+                    string message;
                     foreach (var interview in interviews)
                     {
                         foreach (var questionData in interview.QuestionData)
@@ -52,10 +57,13 @@ namespace CapiControls.Controls.Form3
                             product = Products.Where(p => p.Code == productCode).FirstOrDefault();
                             if (product != null && !product.Units.Contains(unit))
                             {
-                                file.WriteLine("http://capi.stat.kg/Interview/Review/" + interview.Id + $"/Section/{questionData.QuestionSection.Replace("-", "")}"); // ; {product.Name};
+                                hhCode = InterviewRepo.GetQuestionFirstAnswer(interview.Id, "hhCode");
+                                message = $"Форма: {_questionnaireTitle}. Раздел 2. Код домохяйства: {hhCode}. Ошибка: {product.Name} (единицы измерения).";
+                                file.InsertParagraph(message);
                             }
                         }
                     }
+                    file.Save();
                 }
 
                 Execute(questionnaireId, offset += 1000);

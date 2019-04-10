@@ -222,5 +222,59 @@ namespace CapiControls.Data.Repositories.Server
 
             return answer;
         }
+
+        public string GetQuestionFirstAnswer(string interviewId, string questionCode)
+        {
+            string query = @"
+                    select
+                        coalesce(
+                            interview.asstring
+                            , cast(interview.asint as varchar)
+                            , cast(interview.aslong as varchar)
+                            , cast(interview.asdouble as varchar)
+                            , cast(interview.asdatetime as varchar)
+                            , cast(interview.aslist as varchar)
+                            , cast(interview.asbool as varchar)
+                            , cast(interview.asintarray as varchar)
+                            , cast(interview.asintmatrix as varchar)
+                            , cast(interview.asgps as varchar)
+                            , cast(interview.asyesno as varchar)
+                            , cast(interview.asaudio as varchar)
+                            , cast(interview.asarea as varchar)
+                            , @noAnswer
+                        ) as Answer
+                    from
+                        readside.interviews as interview
+                        join
+                            readside.interviews_id as interview_id
+                        on
+                            interview.interviewid = interview_id.id
+                        join
+                            readside.interviewsummaries as summary
+                        on
+                            interview_id.interviewid = summary.interviewid
+                        join
+                            readside.questionnaire_entities as question_entity
+                        on
+                            interview.entityid = question_entity.id
+                    where
+                        question_entity.stata_export_caption = @questionCode
+                        and summary.summaryid = @interviewId
+                    limit 1
+                ";
+
+            string answer = "";
+            using (var connection = Connection)
+            {
+                answer = connection.QueryFirst<string>(query, new
+                {
+                    noAnswer = "",
+                    questionCode,
+                    interviewId
+                });
+            }
+
+            return answer;
+        }
     }
 }

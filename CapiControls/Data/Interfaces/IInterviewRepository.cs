@@ -9,5 +9,6 @@ namespace CapiControls.Data.Interfaces
         List<Interview> GetInterviewsByQuestionnaireAndQuestionCode(string questionnaireId, string questionCode, int offset, int limit);
         List<Interview> CollectInterviews(IEnumerable<RawInterviewData> rawData);
         string GetQuestionAnswerBySection(string interviewId, string questionCode, string section);
+        string GetQuestionFirstAnswer(string interviewId, string questionCode);
     }
 }

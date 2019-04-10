@@ -1,9 +1,10 @@
 ﻿using CapiControls.Controls.Common;
 using CapiControls.Controls.Interfaces;
 using CapiControls.Data.Interfaces;
+using CapiControls.Models.Local;
 using Microsoft.AspNetCore.Hosting;
+using Novacode;
 using System;
-using System.IO;
 using System.Linq;
 
 namespace CapiControls.Controls.Form3
@@ -13,8 +14,9 @@ namespace CapiControls.Controls.Form3
         private readonly IForm3Repository Repository;
         private readonly IInterviewRepository InterviewRepo;
         private string _outputCsvFilePath;
+        private string _questionnaireTitle;
 
-        public F3R1UnitsControl(IForm3Repository repository, IInterviewRepository interviewRepo, IHostingEnvironment hostEnv) : base(hostEnv)
+        public F3R1UnitsControl(IForm3Repository repository, IInterviewRepository interviewRepo, IPaginatedRepository<Questionnaire> questionnaireRepo, IHostingEnvironment hostEnv) : base(questionnaireRepo, hostEnv)
         {
             Repository = repository;
             InterviewRepo = interviewRepo;
@@ -23,14 +25,15 @@ namespace CapiControls.Controls.Form3
         public string Execute(string questionnaireId)
         {
             // Создается файл отчета, в который будут записаны результаты проверки
-            _outputCsvFilePath = CreateReportCsvFile("F3R1Units");
+            _outputCsvFilePath = CreateReportFile("F3R1Units");
+            _questionnaireTitle = GetQuestionnaireTitle(questionnaireId);
 
             Execute(questionnaireId, 0, 1000);
 
             return _outputCsvFilePath;
         }
 
-        private bool Execute(string questionnaireId, int offset = 0, int limit = 1000)
+        private void Execute(string questionnaireId, int offset = 0, int limit = 1000)
         {
             // Считываются данные о продуктах из файла-справочника формата .txt
             // Код, имя и единицы измерения продукта в переменную Products
@@ -42,11 +45,14 @@ namespace CapiControls.Controls.Form3
             // Если есть интервью, выполняется проверка данных
             if (!(interviews.Count <= 0))
             {
-                using (var file = File.AppendText(_outputCsvFilePath))
+                // Открыть файл отчета
+                using (var file = DocX.Load(_outputCsvFilePath))
                 {
                     string productCode;
                     string unit;
                     Product product;
+                    string hhCode;
+                    string message;
                     // Проход по каждому инетрвью
                     foreach (var interview in interviews)
                     {
@@ -65,16 +71,18 @@ namespace CapiControls.Controls.Form3
                             // информация об имени товара и номере интервью записывается в отчетный файл.
                             if (product != null && !product.Units.Contains(unit))
                             {
-                                file.WriteLine("http://capi.stat.kg/Interview/Review/" + interview.Id + $"/Section/{questionData.QuestionSection.Replace("-", "")}"); //; {product.Name};
+                                hhCode = InterviewRepo.GetQuestionFirstAnswer(interview.Id, "hhCode");
+                                message = $"Форма: {_questionnaireTitle}. Раздел 1. Код домохяйства: {hhCode}. Ошибка: {product.Name} (единицы измерения).";
+                                file.InsertParagraph(message);
                             }
                         }
                     }
+                    // Сохранить файл отчета
+                    file.Save();
                 }
 
                 Execute(questionnaireId, offset += 1000);
             }
-
-            return true;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace CapiControls.Controllers
             string filePath = F3ControlService.ExecuteF3R1UnitsControl(questionnaireId);
             byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
 
-            return File(fileBytes, "text/csv", "F3R1Units.csv");
+            return File(fileBytes, "application/msword", "F3R1Units.docx");
         }
 
         [HttpGet]
@@ -57,7 +57,7 @@ namespace CapiControls.Controllers
             string filePath = F3ControlService.ExecuteF3R2UnitsControl(questionnaireId);
             byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
 
-            return File(fileBytes, "text/csv", "F3R2Units.csv");
+            return File(fileBytes, "application/msword", "F3R2Units.docx");
         }
 
         private SelectList GetQuestionnairesSelectList()
