@@ -14,7 +14,7 @@ namespace CapiControls.Data.Repositories.Server
 
         public InterviewRepository(IConfiguration configuration) : base(configuration, "server.readside") { }
 
-        protected string BaseQuery
+        protected string DefaultSelect
         {
             get
             {
@@ -22,6 +22,7 @@ namespace CapiControls.Data.Repositories.Server
                     select
                         summary.summaryid as InterviewId
                         , summary.questionnaireidentity as QuestionnaireId
+                        , summary.teamleadname as Region
                         , question_entity.stata_export_caption as QuestionCode
                         , cast(question_entity.parentid as varchar) as QuestionSection
                         , interview.rostervector as QuestionSectionSuffix
@@ -39,8 +40,17 @@ namespace CapiControls.Data.Repositories.Server
                             , cast(interview.asyesno as varchar)
                             , cast(interview.asaudio as varchar)
                             , cast(interview.asarea as varchar)
-                            , @no_answer
+                            , ''
                         ) as Answer
+                ";
+            }
+        }
+
+        protected string DefaultFrom
+        {
+            get
+            {
+                return @"
                     from
                         readside.interviews as interview
                         join
@@ -59,33 +69,76 @@ namespace CapiControls.Data.Repositories.Server
                             readside.interviewcommentaries as interview_info
                         on
                             summary.summaryid = interview_info.id
+                ";
+            }
+        }
+
+        protected string DefaultWhere
+        {
+            get
+            {
+                return @"
                     where
                         question_entity.stata_export_caption is not null
                         and interview_info.isdeleted = false
                         and interview_info.isapprovedbyhq = false
                         and summary.wasrejectedbysupervisor = false
-                        and summary.questionnaireidentity = @questionnaire_id
+                        and summary.questionnaireidentity = @questionnaireId
+                ";
+            }
+        }
+
+        protected string RegionWhere
+        {
+            get
+            {
+                return DefaultWhere + "and lower(summary.teamleadname) like concat(@region, '%')\n";
+            }
+        }
+
+        protected string DefaultOffsetLimit
+        {
+            get
+            {
+                return @"
+                    order by interview_id
+                    offset @offset
+                    limit @limit
                 ";
             }
         }
 
         public List<Interview> GetInterviewsByQuestionnaire(string questionnaireId, int offset, int limit)
         {
-            string query = BaseQuery + @"
-                order by interview_id
-                offset @_offset
-                limit @_limit
-                ";
+            string query = DefaultSelect + DefaultFrom + DefaultWhere + DefaultOffsetLimit;
 
             IEnumerable<RawInterviewData> rawData = Enumerable.Empty<RawInterviewData>();
-            using (IDbConnection connection = Connection)
+            using (var connection = Connection)
             {
                 rawData = connection.Query<RawInterviewData>(query, new
                 {
-                    no_answer = "",
-                    questionnaire_id = questionnaireId,
-                    _offset = offset,
-                    _limit = limit
+                    questionnaireId,
+                    offset,
+                    limit
+                });
+            }
+
+            return CollectInterviews(rawData);
+        }
+
+        public List<Interview> GetInterviewsByQuestionnaireAndRegion(string questionnaireId, string region, int offset, int limit)
+        {
+            string query = DefaultSelect + DefaultFrom + RegionWhere + DefaultOffsetLimit;
+
+            IEnumerable<RawInterviewData> rawData = Enumerable.Empty<RawInterviewData>();
+            using (var connection = Connection)
+            {
+                rawData = connection.Query<RawInterviewData>(query, new
+                {
+                    questionnaireId,
+                    region,
+                    offset,
+                    limit
                 });
             }
 
@@ -140,23 +193,17 @@ namespace CapiControls.Data.Repositories.Server
 
         public List<Interview> GetInterviewsByQuestionnaireAndQuestionCode(string questionnaireId, string questionCode, int offset, int limit)
         {
-            string query = BaseQuery + @"
-                        and question_entity.stata_export_caption = @question_code
-                    order by interview_id
-                    offset @_offset
-                    limit @limit
-                ";
+            string query = DefaultSelect + DefaultFrom + DefaultWhere + "\nand question_entity.stata_export_caption = @questionCode\n" + DefaultOffsetLimit;
 
             IEnumerable<RawInterviewData> rawData = Enumerable.Empty<RawInterviewData>();
             using (var connection = Connection)
             {
                 rawData = connection.Query<RawInterviewData>(query, new
                 {
-                    no_answer = "",
-                    questionnaire_id = questionnaireId,
-                    question_code = questionCode,
-                    _offset = offset,
-                    _limit = limit
+                    questionnaireId,
+                    questionCode,
+                    offset,
+                    limit
                 });
             }
 
@@ -183,7 +230,7 @@ namespace CapiControls.Data.Repositories.Server
                             , cast(interview.asyesno as varchar)
                             , cast(interview.asaudio as varchar)
                             , cast(interview.asarea as varchar)
-                            , @noAnswer
+                            , ''
                         ) as Answer
                     from
                         readside.interviews as interview
@@ -212,7 +259,6 @@ namespace CapiControls.Data.Repositories.Server
             {
                 answer = connection.QueryFirst<string>(query, new
                 {
-                    noAnswer = "",
                     questionCode,
                     interviewId,
                     section = new Guid(section),
@@ -241,7 +287,7 @@ namespace CapiControls.Data.Repositories.Server
                             , cast(interview.asyesno as varchar)
                             , cast(interview.asaudio as varchar)
                             , cast(interview.asarea as varchar)
-                            , @noAnswer
+                            , ''
                         ) as Answer
                     from
                         readside.interviews as interview
@@ -268,10 +314,22 @@ namespace CapiControls.Data.Repositories.Server
             {
                 answer = connection.QueryFirst<string>(query, new
                 {
-                    noAnswer = "",
                     questionCode,
                     interviewId
                 });
+            }
+
+            return answer;
+        }
+
+        public string GetInterviewKey(string interviewId)
+        {
+            string query = "select key from readside.interviewsummaries where summaryid = @interviewId limit 1";
+
+            string answer = "";
+            using (var connection = Connection)
+            {
+                answer = connection.QueryFirst<string>(query, new { interviewId });
             }
 
             return answer;

@@ -36,7 +36,7 @@ namespace CapiControls.Data.Repositories.Local
         {
             using (var connection = Connection)
             {
-                return connection.Query<Group>("SELECT id as Id, title as Title FROM main.groups").ToList();
+                return connection.Query<Group>("SELECT id as Id, title as Title FROM main.groups ORDER BY title").ToList();
             }
         }
 
@@ -45,7 +45,7 @@ namespace CapiControls.Data.Repositories.Local
             using (var connection = Connection)
             {
                 int offset = (page - 1) * itemsPerPage;
-                string query = @"SELECT id as Id, title as Title FROM main.groups OFFSET @Offset LIMIT @Limit";
+                string query = @"SELECT id as Id, title as Title FROM main.groups ORDER BY title OFFSET @Offset LIMIT @Limit";
 
                 return connection.Query<Group>(query, new { Offset = offset, Limit = itemsPerPage }).ToList();
             }

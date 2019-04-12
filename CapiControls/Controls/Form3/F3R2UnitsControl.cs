@@ -22,21 +22,21 @@ namespace CapiControls.Controls.Form3
             InterviewRepo = interviewRepo;
         }
 
-        public string Execute(string questionnaireId)
+        public string Execute(string questionnaireId, string region)
         {
             _outputCsvFilePath = CreateReportFile("F3R2Units");
             _questionnaireTitle = GetQuestionnaireTitle(questionnaireId);
 
-            Execute(questionnaireId, 0, 1000);
+            Execute(questionnaireId, region, 0, 1000);
 
             return _outputCsvFilePath;
         }
 
-        private void Execute(string questionnaireId, int offset = 0, int limit = 1000)
+        private void Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
         {
             ReadProductsFromFile(BuildFilePath(CatalogsDirectory, ProductInfoFileName));
 
-            var interviews = Repository.GetF3R2UnitsInterviewsByQuestionnaire(questionnaireId, offset, limit);
+            var interviews = Repository.GetF3R2UnitsInterviewsByQuestionnaire(questionnaireId, offset, limit, region);
 
             if (!(interviews.Count <= 0))
             {
@@ -46,7 +46,7 @@ namespace CapiControls.Controls.Form3
                     string unit;
                     Product product;
                     string hhCode;
-                    string message;
+                    string key;
                     foreach (var interview in interviews)
                     {
                         foreach (var questionData in interview.QuestionData)
@@ -58,15 +58,21 @@ namespace CapiControls.Controls.Form3
                             if (product != null && !product.Units.Contains(unit))
                             {
                                 hhCode = InterviewRepo.GetQuestionFirstAnswer(interview.Id, "hhCode");
-                                message = $"Форма: {_questionnaireTitle}. Раздел 2. Код домохяйства: {hhCode}. Ошибка: {product.Name} (единицы измерения).";
-                                file.InsertParagraph(message);
+                                key = InterviewRepo.GetInterviewKey(interview.Id);
+
+                                file.InsertParagraph($"{FormString}: {_questionnaireTitle}.");
+                                file.InsertParagraph($"{IdentifierString}: {key}.");
+                                file.InsertParagraph($"{SectionString}: 2.");
+                                file.InsertParagraph($"{HouseholdCodeString}: {hhCode}.");
+                                file.InsertParagraph($"{ErrorString}: {product.Name} (единицы измерения).");
+                                file.InsertParagraph();
                             }
                         }
                     }
                     file.Save();
                 }
 
-                Execute(questionnaireId, offset += 1000);
+                Execute(questionnaireId, region, offset += 1000);
             }
         }
     }

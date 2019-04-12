@@ -15,6 +15,12 @@ namespace CapiControls.Controls
         protected const string ReportsDirectory = "Reports";
         protected const string CatalogsDirectory = "Catalogs";
 
+        protected const string FormString = "Форма";
+        protected const string IdentifierString = "Идентификатор";
+        protected const string SectionString = "Раздел";
+        protected const string HouseholdCodeString = "Код домохозяйства";
+        protected const string ErrorString = "Ошибка";
+
         protected const string ProductInfoFileName = "Units.txt";
 
         protected readonly IPaginatedRepository<Questionnaire> QuestionnaireRepo;

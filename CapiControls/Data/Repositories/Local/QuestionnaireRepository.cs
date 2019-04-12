@@ -57,6 +57,7 @@ namespace CapiControls.Data.Repositories.Local
                         , quest.title as Title
                     FROM main.questionnaires as quest
                     JOIN main.groups as group_t ON quest.group_id = group_t.id
+                    ORDER BY quest.title
                 ";
 
                 return connection.Query<Questionnaire>(query).ToList();
@@ -76,6 +77,7 @@ namespace CapiControls.Data.Repositories.Local
                         , quest.title as Title
                     FROM main.questionnaires as quest
                     JOIN main.groups as group_t ON quest.group_id = group_t.id
+                    ORDER BY quest.title
                     OFFSET @Offset
                     LIMIT @Limit
                 ";

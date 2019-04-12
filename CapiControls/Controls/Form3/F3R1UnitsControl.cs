@@ -22,25 +22,25 @@ namespace CapiControls.Controls.Form3
             InterviewRepo = interviewRepo;
         }
 
-        public string Execute(string questionnaireId)
+        public string Execute(string questionnaireId, string region = null)
         {
             // Создается файл отчета, в который будут записаны результаты проверки
             _outputCsvFilePath = CreateReportFile("F3R1Units");
             _questionnaireTitle = GetQuestionnaireTitle(questionnaireId);
 
-            Execute(questionnaireId, 0, 1000);
+            Execute(questionnaireId, region, 0, 1000);
 
             return _outputCsvFilePath;
         }
 
-        private void Execute(string questionnaireId, int offset = 0, int limit = 1000)
+        private void Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
         {
             // Считываются данные о продуктах из файла-справочника формата .txt
             // Код, имя и единицы измерения продукта в переменную Products
             ReadProductsFromFile(BuildFilePath(CatalogsDirectory, ProductInfoFileName));
 
             // Выбирется 1000 записей, относящихся к первому разделу формы 3 и собираются/группируются в интервью
-            var interviews = Repository.GetF3R1UnitsInterviewsByQuestionnaire(questionnaireId, offset, limit);
+            var interviews = Repository.GetF3R1UnitsInterviewsByQuestionnaire(questionnaireId, offset, limit, region);
 
             // Если есть интервью, выполняется проверка данных
             if (!(interviews.Count <= 0))
@@ -52,7 +52,7 @@ namespace CapiControls.Controls.Form3
                     string unit;
                     Product product;
                     string hhCode;
-                    string message;
+                    string key;
                     // Проход по каждому инетрвью
                     foreach (var interview in interviews)
                     {
@@ -72,8 +72,14 @@ namespace CapiControls.Controls.Form3
                             if (product != null && !product.Units.Contains(unit))
                             {
                                 hhCode = InterviewRepo.GetQuestionFirstAnswer(interview.Id, "hhCode");
-                                message = $"Форма: {_questionnaireTitle}. Раздел 1. Код домохяйства: {hhCode}. Ошибка: {product.Name} (единицы измерения).";
-                                file.InsertParagraph(message);
+                                key = InterviewRepo.GetInterviewKey(interview.Id);
+
+                                file.InsertParagraph($"{FormString}: {_questionnaireTitle}.");
+                                file.InsertParagraph($"{IdentifierString}: {key}.");
+                                file.InsertParagraph($"{SectionString}: 1.");
+                                file.InsertParagraph($"{HouseholdCodeString}: {hhCode}.");
+                                file.InsertParagraph($"{ErrorString}: {product.Name} (единицы измерения).");
+                                file.InsertParagraph();
                             }
                         }
                     }
@@ -81,7 +87,7 @@ namespace CapiControls.Controls.Form3
                     file.Save();
                 }
 
-                Execute(questionnaireId, offset += 1000);
+                Execute(questionnaireId, region, offset += 1000);
             }
         }
     }
