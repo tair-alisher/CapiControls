@@ -1,8 +1,12 @@
 ﻿using CapiControls.Controls.Common;
+using CapiControls.Data.Interfaces;
+using CapiControls.Models.Local;
 using Microsoft.AspNetCore.Hosting;
+using Novacode;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace CapiControls.Controls
 {
@@ -11,14 +15,22 @@ namespace CapiControls.Controls
         protected const string ReportsDirectory = "Reports";
         protected const string CatalogsDirectory = "Catalogs";
 
+        protected const string FormString = "Форма";
+        protected const string IdentifierString = "Идентификатор";
+        protected const string SectionString = "Раздел";
+        protected const string HouseholdCodeString = "Код домохозяйства";
+        protected const string ErrorString = "Ошибка";
+
         protected const string ProductInfoFileName = "Units.txt";
 
+        protected readonly IPaginatedRepository<Questionnaire> QuestionnaireRepo;
         private readonly IHostingEnvironment HostingEnvironment;
 
         protected List<Product> Products;
 
-        public BaseControl(IHostingEnvironment hostEnv)
+        public BaseControl(IPaginatedRepository<Questionnaire> questionnaireRepo, IHostingEnvironment hostEnv)
         {
+            QuestionnaireRepo = questionnaireRepo;
             HostingEnvironment = hostEnv;
         }
 
@@ -57,10 +69,15 @@ namespace CapiControls.Controls
             }
         }
 
-        protected string CreateReportCsvFile(string fileName)
+        protected string GetQuestionnaireTitle(string identifier)
         {
-            string filePath = BuildFilePath(ReportsDirectory, $"{fileName}-" + DateTime.Now.ToString("yyyy.MM.dd-HH.mm") + ".csv");
-            File.Create(filePath).Close();
+            return QuestionnaireRepo.GetAll().Where(q => q.Identifier == identifier).First().Title;
+        }
+
+        protected string CreateReportFile(string fileName)
+        {
+            string filePath = BuildFilePath(ReportsDirectory, $"{fileName}-" + DateTime.Now.ToString("yyyy.MM.dd-HH.mm") + ".docx");
+            DocX.Create(filePath).Save();
 
             return filePath;
         }

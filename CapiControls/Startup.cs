@@ -45,8 +45,10 @@ namespace CapiControls
             services.AddTransient<IPaginatedRepository<Questionnaire>, QuestionnaireRepository>();
             services.AddTransient<IPaginatedRepository<Group>, GroupRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IRepository<Region>, RegionRepository>();
 
             // Services
+            services.AddTransient<IBaseControlService, BaseControlService>();
             services.AddTransient<IF3ControlService, F3ControlService>();
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IUserService, UserService>();
