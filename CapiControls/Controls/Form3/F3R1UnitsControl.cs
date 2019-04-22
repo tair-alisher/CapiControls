@@ -37,7 +37,7 @@ namespace CapiControls.Controls.Form3
         {
             // Считываются данные о продуктах из файла-справочника формата .txt
             // Код, имя и единицы измерения продукта в переменную Products
-            ReadProductsFromFile(BuildFilePath(CatalogsDirectory, ProductInfoFileName));
+            ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
 
             // Выбирется 1000 записей, относящихся к первому разделу формы 3 и собираются/группируются в интервью
             var interviews = Repository.GetF3R1UnitsInterviewsByQuestionnaire(questionnaireId, offset, limit, region);

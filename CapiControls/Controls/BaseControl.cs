@@ -21,7 +21,7 @@ namespace CapiControls.Controls
         protected const string HouseholdCodeString = "Код домохозяйства";
         protected const string ErrorString = "Ошибка";
 
-        protected const string ProductInfoFileName = "Units.txt";
+        protected const string ProdInfoFileName = "ProdUnits.txt";
 
         protected readonly IPaginatedRepository<Questionnaire> QuestionnaireRepo;
         private readonly IHostingEnvironment HostingEnvironment;
@@ -40,7 +40,7 @@ namespace CapiControls.Controls
             return Path.Combine(rootDir, "Files", directory, fileName);
         }
 
-        protected virtual void ReadProductsFromFile(string filePath)
+        protected virtual void ReadProdInfoFromFile(string filePath)
         {
             Products = new List<Product>();
 
@@ -59,7 +59,7 @@ namespace CapiControls.Controls
 
                         code = lineParts[0];
                         name = lineParts[1];
-                        units = lineParts[2].Split('/');
+                        units = lineParts[3].Split('/');
                         product = new Product(code, name, units);
 
                         Products.Add(product);

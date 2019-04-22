@@ -34,7 +34,7 @@ namespace CapiControls.Controls.Form3
 
         private void Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
         {
-            ReadProductsFromFile(BuildFilePath(CatalogsDirectory, ProductInfoFileName));
+            ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
 
             var interviews = Repository.GetF3R2UnitsInterviewsByQuestionnaire(questionnaireId, offset, limit, region);
 
