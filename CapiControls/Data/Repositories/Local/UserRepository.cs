@@ -181,7 +181,7 @@ namespace CapiControls.Data.Repositories.Local
                 rawUserData = connection.Query<RawUserData>(query, new { offset, pageSize }).ToList();
             }
 
-            List<User> users = new List<User>();
+            var users = new List<User>();
             foreach (var rawUser in rawUserData)
             {
                 if (users.Where(u => u.Id == rawUser.Id).Count() <= 0)
