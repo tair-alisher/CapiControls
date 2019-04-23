@@ -16,7 +16,7 @@ namespace CapiControls.DAL.Repositories
         public void Add(User item)
         {
             Connection.Execute(
-                @"INSERT INTO main.users (id, login, username, password)
+                @"INSERT INTO users (id, login, username, password)
                 VALUES(@Id, @Login, @UserName, @Password)",
                 param: item,
                 transaction: Transaction
@@ -26,7 +26,7 @@ namespace CapiControls.DAL.Repositories
         public int CountAll()
         {
             return Connection.QueryFirstOrDefault<int>(
-                "SELECT COUNT(id) FROM main.users",
+                "SELECT COUNT(id) FROM users",
                 transaction: Transaction
             );
         }
@@ -34,13 +34,13 @@ namespace CapiControls.DAL.Repositories
         public void Delete(Guid id)
         {
             Connection.Execute(
-                "DELETE FROM main.userroles WHERE user_id = @id",
+                "DELETE FROM userroles WHERE user_id = @id",
                 param: new { id },
                 transaction: Transaction
             );
 
             Connection.Execute(
-                "DELETE from main.users WHERE id = @id",
+                "DELETE from users WHERE id = @id",
                 param: new { id },
                 transaction: Transaction
             );
@@ -61,9 +61,9 @@ namespace CapiControls.DAL.Repositories
                     role_t.id as RoleId,
                     role_t.name as RoleName,
                     role_t.title as RoleTitle
-                FROM main.users as user_t
-                JOIN main.userroles as userrole_t on user_t.id = userrole_t.user_id
-                JOIN main.roles as role_t on userrole_t.role_id = role_t.id
+                FROM users as user_t
+                JOIN userroles as userrole_t on user_t.id = userrole_t.user_id
+                JOIN roles as role_t on userrole_t.role_id = role_t.id
                 WHERE user_t.id = @id",
                 param: new { id },
                 transaction: Transaction
@@ -110,9 +110,9 @@ namespace CapiControls.DAL.Repositories
                     role_t.id as RoleId,
                     role_t.name as RoleName,
                     role_t.title as RoleTitle
-                FROM main.users as user_t
-                JOIN main.userroles as userrole_t on user_t.id = userrole_t.user_id
-                JOIN main.roles as role_t on userrole_t.role_id = role_t.id",
+                FROM users as user_t
+                JOIN userroles as userrole_t on user_t.id = userrole_t.user_id
+                JOIN roles as role_t on userrole_t.role_id = role_t.id",
                 transaction: Transaction
             ).ToList();
 
@@ -152,7 +152,7 @@ namespace CapiControls.DAL.Repositories
             return users;
         }
 
-        public IEnumerable<User> GetAll(int pageSize, int page)
+        public IEnumerable<User> GetAll(int page, int pageSize)
         {
             int offset = (page - 1) * pageSize;
             var rawUserData = Connection.Query<RawUserData>(
@@ -163,9 +163,9 @@ namespace CapiControls.DAL.Repositories
                     role_t.id as RoleId,
                     role_t.name as RoleName,
                     role_t.title as RoleTitle
-                FROM main.users as user_t
-                JOIN main.userroles as userrole_t on user_t.id = userrole_t.user_id
-                JOIN main.roles as role_t on userrole_t.role_id = role_t.id
+                FROM users as user_t
+                JOIN userroles as userrole_t on user_t.id = userrole_t.user_id
+                JOIN roles as role_t on userrole_t.role_id = role_t.id
                 OFFSET @offset
                 LIMIT @pageSize",
                 param: new { offset, pageSize },
@@ -185,9 +185,9 @@ namespace CapiControls.DAL.Repositories
                     role_t.id as RoleId,
                     role_t.name as RoleName,
                     role_t.title as RoleTitle
-                FROM main.users as user_t
-                JOIN main.userroles as userrole_t on user_t.id = userrole_t.user_id
-                JOIN main.roles as role_t on userrole_t.role_id = role_t.id
+                FROM users as user_t
+                JOIN userroles as userrole_t on user_t.id = userrole_t.user_id
+                JOIN roles as role_t on userrole_t.role_id = role_t.id
                 WHERE user_t.login = @login and user_t.password = @passwordHash",
                 param: new { login, passwordHash },
                 transaction: Transaction
@@ -199,7 +199,7 @@ namespace CapiControls.DAL.Repositories
         public void Update(User item)
         {
             Connection.Execute(
-                "UPDATE main.users SET login = @Login, username = @UserName WHERE id = @Id",
+                "UPDATE users SET login = @Login, username = @UserName WHERE id = @Id",
                 param: item,
                 transaction: Transaction
             );
@@ -208,7 +208,7 @@ namespace CapiControls.DAL.Repositories
         public List<Role> GetRoles()
         {
             return Connection.Query<Role>(
-                "SELECT id as Id, name as Name, title as Title FROM main.roles ORDER BY title",
+                "SELECT id as Id, name as Name, title as Title FROM roles ORDER BY title",
                 transaction: Transaction
             ).ToList();
         }
@@ -216,7 +216,7 @@ namespace CapiControls.DAL.Repositories
         public void AddRoleToUser(Guid roleId, Guid userId)
         {
             Connection.Execute(
-                @"INSERT INTO main.userroles (id, user_id, role_id)
+                @"INSERT INTO userroles (id, user_id, role_id)
                 VALUES(@id, @userId, @roleId)",
                 param: new { id = Guid.NewGuid(), userId, roleId },
                 transaction: Transaction
@@ -226,7 +226,7 @@ namespace CapiControls.DAL.Repositories
         public void RemoveRoleFromUser(Guid roleId, Guid userId)
         {
             Connection.Execute(
-                "DELETE FROM main.userroles WHERE user_id = @userId and role_id = @roleId",
+                "DELETE FROM userroles WHERE user_id = @userId and role_id = @roleId",
                 param: new { userId, roleId },
                 transaction: Transaction
             );
@@ -235,7 +235,7 @@ namespace CapiControls.DAL.Repositories
         public void UpdatePassword(Guid userId, string newPassword)
         {
             Connection.Execute(
-                "UPDATE main.users SET password = @newPassword WHERE id = @userId",
+                "UPDATE users SET password = @newPassword WHERE id = @userId",
                 param: new { userId, newPassword },
                 transaction: Transaction
             );
@@ -244,7 +244,7 @@ namespace CapiControls.DAL.Repositories
         public bool UserExists(string login)
         {
             int userCount = Connection.QueryFirstOrDefault<int>(
-                "SELECT COUNT(id) FROM main.users WHERE login = @login",
+                "SELECT COUNT(id) FROM users WHERE login = @login",
                 param: new { login },
                 transaction: Transaction
             );

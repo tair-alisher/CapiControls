@@ -1,0 +1,38 @@
+﻿@model CapiControls.BLL.DTO.QuestionnaireDTO
+
+@{
+    ViewData["Title"] = "Подробности";
+}
+
+<div>
+    <h4>Опросник</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Идентификатор
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Identifier)
+        </dd>
+        <dt class="col-sm-2">
+            Группа
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Group)
+        </dd>
+        <dt class="col-sm-2">
+            Наименование
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-controller="Questionnaire"
+       asp-action="Edit"
+       asp-route-id="@Model.Id">Редактировать</a> |
+    <a asp-action="Index">Назад к списку</a>
+</div>
+
+

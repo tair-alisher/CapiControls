@@ -17,7 +17,7 @@ namespace CapiControls.DAL.Repositories
         {
             item.Id = Guid.NewGuid();
             Connection.Execute(
-                @"INSERT INTO main.questionnaires (id, group_id, identifier, title)
+                @"INSERT INTO questionnaires (id, group_id, identifier, title)
                 VALUES (@Id, @GroupId, @Identifier, @Title)",
                 param: item,
                 transaction: Transaction
@@ -27,7 +27,7 @@ namespace CapiControls.DAL.Repositories
         public int CountAll()
         {
             return Connection.QueryFirstOrDefault<int>(
-                "SELECT COUNT(id) FROM main.questionnaires",
+                "SELECT COUNT(id) FROM questionnaires",
                 transaction: Transaction
             );
         }
@@ -35,7 +35,7 @@ namespace CapiControls.DAL.Repositories
         public void Delete(Guid id)
         {
             Connection.Execute(
-                "DELETE FROM main.questionnaires WHERE id = @id",
+                "DELETE FROM questionnaires WHERE id = @id",
                 param: new { id },
                 transaction: Transaction
             );
@@ -55,8 +55,8 @@ namespace CapiControls.DAL.Repositories
                     , group_t.title as Group
                     , quest.identifier as Identifier
                     , quest.title as Title
-                FROM main.questionnaires as quest
-                JOIN main.groups as group_t ON quest.group_id = group_t.id
+                FROM questionnaires as quest
+                JOIN groups as group_t ON quest.group_id = group_t.id
                 WHERE quest.id = @id",
                 param: new { id },
                 transaction: Transaction
@@ -72,14 +72,14 @@ namespace CapiControls.DAL.Repositories
                     , group_t.title as Group
                     , quest.identifier as Identifier
                     , quest.title as Title
-                FROM main.questionnaires as quest
-                JOIN main.groups as group_t ON quest.group_id = group_t.id
+                FROM questionnaires as quest
+                JOIN groups as group_t ON quest.group_id = group_t.id
                 ORDER BY quest.title",
                 transaction: Transaction
             ).ToList();
         }
 
-        public IEnumerable<Questionnaire> GetAll(int pageSize, int page)
+        public IEnumerable<Questionnaire> GetAll(int page, int pageSize)
         {
             int offset = (page - 1) * pageSize;
             return Connection.Query<Questionnaire>(
@@ -89,8 +89,8 @@ namespace CapiControls.DAL.Repositories
                     , group_t.title as Group
                     , quest.identifier as Identifier
                     , quest.title as Title
-                FROM main.questionnaires as quest
-                JOIN main.groups as group_t ON quest.group_id = group_t.id
+                FROM questionnaires as quest
+                JOIN groups as group_t ON quest.group_id = group_t.id
                 ORDER BY quest.title
                 OFFSET @offset
                 LIMIT @pageSize",
@@ -102,7 +102,7 @@ namespace CapiControls.DAL.Repositories
         public void Update(Questionnaire item)
         {
             Connection.Execute(
-                @"UPDATE main.questionnaires
+                @"UPDATE questionnaires
                 SET group_id = @GroupId, identifier = @Identifier, title = @Title
                 WHERE id = @Id",
                 param: item,

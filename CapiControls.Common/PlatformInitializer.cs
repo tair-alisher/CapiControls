@@ -1,4 +1,6 @@
-﻿using CapiControls.Common.Interfaces;
+﻿using CapiControls.BLL.Interfaces;
+using CapiControls.BLL.Services;
+using CapiControls.Common.Interfaces;
 using CapiControls.DAL.Interfaces.Units;
 using CapiControls.DAL.Units;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +27,10 @@ namespace CapiControls.Common
             services.AddScoped<IRemoteUnitOfWork>(remoteUnit => new RemoteUnitOfWork(
                 Configuration.GetConnectionString("RemoteConnection"))
             );
+
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IQuestionnaireService, QuestionnaireService>();
+            services.AddScoped<IGroupService, GroupService>();
         }
     }
 }

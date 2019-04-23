@@ -8,6 +8,6 @@ namespace CapiControls.BLL.DTO
         public Guid GroupId { get; set; }
         public string Group { get; set; }
         public string Identifier { get; set; }
-        public string Title { get; set; }r
+        public string Title { get; set; }
     }
 }

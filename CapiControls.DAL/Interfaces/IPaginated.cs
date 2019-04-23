@@ -4,7 +4,7 @@ namespace CapiControls.DAL.Interfaces
 {
     public interface IPaginated<T> where T : class
     {
-        IEnumerable<T> GetAll(int pageSize, int page);
+        IEnumerable<T> GetAll(int page, int pageSize);
         int CountAll();
     }
 }

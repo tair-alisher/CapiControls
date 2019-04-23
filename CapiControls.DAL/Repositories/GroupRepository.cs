@@ -17,7 +17,7 @@ namespace CapiControls.DAL.Repositories
         {
             item.Id = Guid.NewGuid();
             Connection.Execute(
-                "INSERT INTO main.groups (id, title) VALUES(@Id, @Title)",
+                "INSERT INTO groups (id, title) VALUES(@Id, @Title)",
                 param: item,
                 transaction: Transaction
             );
@@ -26,7 +26,7 @@ namespace CapiControls.DAL.Repositories
         public int CountAll()
         {
             return Connection.QueryFirstOrDefault<int>(
-                "SELECT COUNT(id) FROM main.groups",
+                "SELECT COUNT(id) FROM groups",
                 transaction: Transaction
             );
         }
@@ -34,7 +34,7 @@ namespace CapiControls.DAL.Repositories
         public void Delete(Guid id)
         {
             Connection.Execute(
-                "DELETE FROM main.groups WHERE id = @id",
+                "DELETE FROM groups WHERE id = @id",
                 param: new { id },
                 transaction: Transaction
             );
@@ -48,7 +48,7 @@ namespace CapiControls.DAL.Repositories
         public Group Find(Guid id)
         {
             return Connection.QueryFirstOrDefault<Group>(
-                "SELECT id as Id, title as Title FROM main.groups WHERE id = @id",
+                "SELECT id as Id, title as Title FROM groups WHERE id = @id",
                 param: new { id },
                 transaction: Transaction
             );
@@ -57,18 +57,18 @@ namespace CapiControls.DAL.Repositories
         public IEnumerable<Group> GetAll()
         {
             return Connection.Query<Group>(
-                "SELECT id as Id, title as Title FROM main.groups ORDER BY title",
+                "SELECT id as Id, title as Title FROM groups ORDER BY title",
                 transaction: Transaction
             ).ToList();
         }
 
-        public IEnumerable<Group> GetAll(int pageSize, int page)
+        public IEnumerable<Group> GetAll(int page, int pageSize)
         {
             int offset = (page - 1) * pageSize;
 
             return Connection.Query<Group>(
                 @"SELECT id as Id, title as Title
-                FROM main.groups
+                FROM groups
                 ORDER BY title
                 OFFSET @offset
                 LIMIT @pageSize",
@@ -80,7 +80,7 @@ namespace CapiControls.DAL.Repositories
         public void Update(Group item)
         {
             Connection.Execute(
-                "UPDATE main.groups SET title = @title WHERE id = @Id",
+                "UPDATE groups SET title = @title WHERE id = @Id",
                 param: item,
                 transaction: Transaction
             );

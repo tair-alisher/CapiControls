@@ -17,7 +17,7 @@ namespace CapiControls.DAL.Repositories
         {
             item.Id = Guid.NewGuid();
             Connection.Execute(
-               @"INSERT INTO main.regions (id, name, title)
+               @"INSERT INTO regions (id, name, title)
                 VALUES(@Id, @Name, @Title)",
                 param: item,
                 transaction: Transaction
@@ -27,7 +27,7 @@ namespace CapiControls.DAL.Repositories
         public void Delete(Guid id)
         {
             Connection.Execute(
-                "DELETE FROM main.regions WHERE id = @id",
+                "DELETE FROM regions WHERE id = @id",
                 param: new { id },
                 transaction: Transaction
             );
@@ -42,7 +42,7 @@ namespace CapiControls.DAL.Repositories
         {
             return Connection.QueryFirstOrDefault<Region>(
                 @"SELECT id as Id, name as Name, title as Title
-                FROM main.regions
+                FROM regions
                 WHERE id = @id",
                 param: new { id },
                 transaction: Transaction
@@ -53,7 +53,7 @@ namespace CapiControls.DAL.Repositories
         {
             return Connection.Query<Region>(
                 @"SELECT id as Id, name as Name, title as Title
-                FROM main.regions.
+                FROM regions.
                 ORDER BY title",
                 transaction: Transaction
             ).ToList();
@@ -62,7 +62,7 @@ namespace CapiControls.DAL.Repositories
         public void Update(Region item)
         {
             Connection.Execute(
-                "UPDATE main.regions SET name = @Name, title = @Title WHERE id = @Id",
+                "UPDATE regions SET name = @Name, title = @Title WHERE id = @Id",
                 param: item,
                 transaction: Transaction
             );

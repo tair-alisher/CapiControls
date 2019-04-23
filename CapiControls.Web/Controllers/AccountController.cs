@@ -1,23 +1,27 @@
-﻿using CapiControls.Exceptions;
-using CapiControls.Services.Interfaces;
-using CapiControls.ViewModels;
+﻿using CapiControls.BLL.DTO.Account;
+using CapiControls.BLL.Exceptions;
+using CapiControls.BLL.Interfaces;
+using CapiControls.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace CapiControls.Controllers
+namespace CapiControls.Web.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IUserService UserService;
+        private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(IUserService userService)
+        public AccountController(IUserService userService, IConfiguration configuration)
         {
-            UserService = userService;
+            _userService = userService;
+            _configuration = configuration;
         }
 
         [HttpGet("account/login")]
@@ -31,7 +35,14 @@ namespace CapiControls.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = UserService.GetUser(model);
+                var loginData = new LoginDTO
+                {
+                    Login = model.Login,
+                    Password = model.Password,
+                    Secret = _configuration.GetValue<string>("Secrets:Salt")
+                };
+
+                var user = _userService.GetUser(loginData);
                 if (user != null)
                 {
                     var claims = new List<Claim>
@@ -41,11 +52,12 @@ namespace CapiControls.Controllers
                     };
 
                     foreach (var role in user.Roles)
-                    {
                         claims.Add(new Claim(role.Name, "true"));
-                    }
 
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims,
+                        CookieAuthenticationDefaults.AuthenticationScheme
+                    );
 
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
@@ -56,13 +68,14 @@ namespace CapiControls.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Проверье введеные данные.");
+                    ModelState.AddModelError(string.Empty, "Проверьте введеные данные.");
                 }
             }
 
             return View();
         }
 
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -86,7 +99,14 @@ namespace CapiControls.Controllers
                 string login = HttpContext.User.FindFirst("Login").Value;
                 try
                 {
-                    UserService.UpdatePassword(login, model);
+                    var changePasswordData = new ChangePasswordDTO
+                    {
+                        OldPassword = model.OldPassword,
+                        NewPassword = model.NewPassword,
+                        Secret = _configuration.GetValue<string>("Secrets:Salt")
+                    };
+                    _userService.UpdatePassword(login, changePasswordData);
+
                     return RedirectToAction("Index", "Control");
                 }
                 catch (WrongOldPasswordException)

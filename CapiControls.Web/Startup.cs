@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CapiControls.Common;
+using CapiControls.Common.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,9 +12,12 @@ namespace CapiControls.Web
 {
     public class Startup
     {
+        private readonly PlatformInitializer _platformInitializer;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _platformInitializer = new PlatformInitializer(configuration);
         }
 
         public IConfiguration Configuration { get; }
@@ -30,8 +32,20 @@ namespace CapiControls.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            _platformInitializer.ConfigureServices(services);
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+                options.LoginPath = new PathString("/account/login")
+            );
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsAdministrator", policy => policy.RequireClaim("IS_ADMIN", "true"));
+                options.AddPolicy("IsUser", policy => policy.RequireClaim("IS_USER", "true"));
+            });
+
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,12 +62,13 @@ namespace CapiControls.Web
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Control}/{action=Index}/{id?}");
             });
         }
     }

@@ -7,7 +7,7 @@ namespace CapiControls.BLL.Interfaces
     public interface IUserService : IBaseService
     {
         int CountUsers();
-        IEnumerable<UserDTO> GetUsers(int pageSize, int page);
+        IEnumerable<UserDTO> GetUsers(int page, int pageSize);
         IEnumerable<RoleDTO> GetRoles();
         void AddUser(RegisterDTO registerData, Guid[] roles);
         bool UserExists(string login);
