@@ -1,17 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.438
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28809.33
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls", "CapiControls\CapiControls.csproj", "{0EBA53B5-A46E-46EC-83AD-74B17C4F7F72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiControls.Common", "CapiControls.Common\CapiControls.Common.csproj", "{DA6C17A6-206B-4197-B713-28B12DAD1BF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls.Common", "CapiControls.Common\CapiControls.Common.csproj", "{DA6C17A6-206B-4197-B713-28B12DAD1BF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiControls.DAL", "CapiControls.DAL\CapiControls.DAL.csproj", "{790CD117-CD8D-4F35-9970-6E2566B45914}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls.DAL", "CapiControls.DAL\CapiControls.DAL.csproj", "{790CD117-CD8D-4F35-9970-6E2566B45914}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiControls.BLL", "CapiControls.BLL\CapiControls.BLL.csproj", "{F67F178C-BF7B-4E3B-934B-D4A8311C580E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls.BLL", "CapiControls.BLL\CapiControls.BLL.csproj", "{F67F178C-BF7B-4E3B-934B-D4A8311C580E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiControls.Web", "CapiControls.Web\CapiControls.Web.csproj", "{A601584A-49EF-42A3-BC35-645D769B5972}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls.Web", "CapiControls.Web\CapiControls.Web.csproj", "{A601584A-49EF-42A3-BC35-645D769B5972}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiControls.Controls", "CapiControls.Controls\CapiControls.Controls.csproj", "{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{A601584A-49EF-42A3-BC35-645D769B5972}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A601584A-49EF-42A3-BC35-645D769B5972}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A601584A-49EF-42A3-BC35-645D769B5972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -15,7 +15,6 @@ namespace CapiControls.DAL.Repositories
 
         public void Add(User item)
         {
-            item.Id = Guid.NewGuid();
             Connection.Execute(
                 @"INSERT INTO main.users (id, login, username, password)
                 VALUES(@Id, @Login, @UserName, @Password)",

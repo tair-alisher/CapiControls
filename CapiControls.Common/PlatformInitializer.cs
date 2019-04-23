@@ -1,6 +1,7 @@
 ﻿using CapiControls.Common.Interfaces;
 using CapiControls.DAL.Interfaces.Units;
 using CapiControls.DAL.Units;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CapiControls.Common
@@ -16,10 +17,12 @@ namespace CapiControls.Common
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<ILocalUnitOfWork>(unit => new LocalUnitOfWork(
+            services.AddSingleton(Mapping.Configuration.CreateDefaultMapper());
+
+            services.AddScoped<ILocalUnitOfWork>(localUnit => new LocalUnitOfWork(
                 Configuration.GetConnectionString("LocalConnection"))
             );
-            services.AddScoped<IRemoteUnitOfWork>(unit => new RemoteUnitOfWork(
+            services.AddScoped<IRemoteUnitOfWork>(remoteUnit => new RemoteUnitOfWork(
                 Configuration.GetConnectionString("RemoteConnection"))
             );
         }
