@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace CapiControls.BLL.Interfaces
 {
-    public interface IGroupService
+    public interface IGroupService : IBaseService
     {
         int CountGroups();
         IEnumerable<GroupDTO> GetGroups();

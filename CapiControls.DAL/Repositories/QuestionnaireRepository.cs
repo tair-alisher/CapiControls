@@ -15,7 +15,6 @@ namespace CapiControls.DAL.Repositories
 
         public void Add(Questionnaire item)
         {
-            item.Id = Guid.NewGuid();
             Connection.Execute(
                 @"INSERT INTO questionnaires (id, group_id, identifier, title)
                 VALUES (@Id, @GroupId, @Identifier, @Title)",

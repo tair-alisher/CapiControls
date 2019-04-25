@@ -31,6 +31,7 @@ namespace CapiControls.Common
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IQuestionnaireService, QuestionnaireService>();
             services.AddScoped<IGroupService, GroupService>();
+            services.AddScoped<IFileService, FileService>();
         }
     }
 }

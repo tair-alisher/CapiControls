@@ -3,6 +3,7 @@ using CapiControls.BLL.Interfaces;
 using CapiControls.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace CapiControls.Web.Controllers
 {
@@ -30,6 +31,64 @@ namespace CapiControls.Web.Controllers
             };
 
             return View(groups);
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "IsUser")]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "IsUser")]
+        public IActionResult Create(GroupDTO group)
+        {
+            if (ModelState.IsValid)
+            {
+                _groupService.AddGroup(group);
+                return RedirectToAction("Index");
+            }
+
+            return View(group);
+        }
+
+        [Authorize(Policy = "IsUser")]
+        public IActionResult Details(Guid id)
+        {
+            var group = _groupService.GetGroup(id);
+            return View(group);
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "IsUser")]
+        public IActionResult Edit(Guid id)
+        {
+            var group = _groupService.GetGroup(id);
+            return View(group);
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "IsUser")]
+        public IActionResult Edit(GroupDTO group)
+        {
+            if (ModelState.IsValid)
+            {
+                _groupService.UpdateGroup(group);
+                return RedirectToAction("Index");
+            }
+
+            return View(group);
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "IsUser")]
+        public IActionResult Delete(Guid id)
+        {
+            if (_groupService.GetGroup(id) != null)
+                _groupService.DeleteGroup(id);
+
+            return RedirectToAction("Index");
         }
     }
 }

@@ -15,7 +15,6 @@ namespace CapiControls.DAL.Repositories
 
         public void Add(Region item)
         {
-            item.Id = Guid.NewGuid();
             Connection.Execute(
                @"INSERT INTO regions (id, name, title)
                 VALUES(@Id, @Name, @Title)",

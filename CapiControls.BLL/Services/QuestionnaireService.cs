@@ -19,6 +19,7 @@ namespace CapiControls.BLL.Services
 
         public void AddQuestionnaire(QuestionnaireDTO questionnaire)
         {
+            questionnaire.Id = Guid.NewGuid();
             _uow.QuestionnaireRepository.Add(Mapper.Map<QuestionnaireDTO, Questionnaire>(questionnaire));
             _uow.Commit();
         }

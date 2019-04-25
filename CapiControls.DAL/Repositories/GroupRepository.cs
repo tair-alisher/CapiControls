@@ -15,7 +15,6 @@ namespace CapiControls.DAL.Repositories
 
         public void Add(Group item)
         {
-            item.Id = Guid.NewGuid();
             Connection.Execute(
                 "INSERT INTO groups (id, title) VALUES(@Id, @Title)",
                 param: item,

@@ -19,6 +19,7 @@ namespace CapiControls.BLL.Services
 
         public void AddGroup(GroupDTO group)
         {
+            group.Id = Guid.NewGuid();
             _uow.GroupRepository.Add(Mapper.Map<GroupDTO, Group>(group));
             _uow.Commit();
         }
