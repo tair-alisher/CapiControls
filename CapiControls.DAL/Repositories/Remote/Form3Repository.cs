@@ -11,7 +11,7 @@ namespace CapiControls.DAL.Repositories.Remote
     {
         public Form3Repository(IDbTransaction transaction) : base(transaction) { }
 
-        public List<Interview> GetF3R1UnitsInterviewsByQuestionnaire(string questionnaireId, int offset, int limit, string region = null)
+        public IEnumerable<RawInterviewData> GetF3R1UnitsInterviewsDataByQuestionnaire(string questionnaireId, int offset, int limit, string region = null)
         {
             string query = base.DefaultSelect
                 + base.DefaultFrom
@@ -25,10 +25,10 @@ namespace CapiControls.DAL.Repositories.Remote
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 
-            return CollectInterviews(rawData);
+            return rawData;
         }
 
-        public List<Interview> GetF3R2UnitsInterviewsByQuestionnaire(string questionnaireId, int offset, int limit, string region = null)
+        public IEnumerable<RawInterviewData> GetF3R2UnitsInterviewsDataByQuestionnaire(string questionnaireId, int offset, int limit, string region = null)
         {
             string query = base.DefaultSelect
                 + base.DefaultFrom
@@ -42,7 +42,7 @@ namespace CapiControls.DAL.Repositories.Remote
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 
-            return CollectInterviews(rawData);
+            return rawData;
         }
     }
 }

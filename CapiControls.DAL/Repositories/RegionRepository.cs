@@ -52,7 +52,7 @@ namespace CapiControls.DAL.Repositories
         {
             return Connection.Query<Region>(
                 @"SELECT id as Id, name as Name, title as Title
-                FROM regions.
+                FROM regions
                 ORDER BY title",
                 transaction: Transaction
             ).ToList();

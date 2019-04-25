@@ -5,6 +5,7 @@ using CapiControls.DAL.Entities;
 using CapiControls.DAL.Interfaces.Units;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CapiControls.BLL.Services
 {
@@ -29,15 +30,16 @@ namespace CapiControls.BLL.Services
             return _uow.QuestionnaireRepository.CountAll();
         }
 
-        public void DeleteQuestionnaire(Guid id)
-        {
-            _uow.QuestionnaireRepository.Delete(id);
-            _uow.Commit();
-        }
-
         public QuestionnaireDTO GetQuestionnaire(Guid id)
         {
             return Mapper.Map<Questionnaire, QuestionnaireDTO>(_uow.QuestionnaireRepository.Find(id));
+        }
+
+        public IEnumerable<QuestionnaireDTO> GetQuestionnaires()
+        {
+            return Mapper.Map<IEnumerable<Questionnaire>, IEnumerable<QuestionnaireDTO>>(
+                _uow.QuestionnaireRepository.GetAll()
+            );
         }
 
         public IEnumerable<QuestionnaireDTO> GetQuestionnaires(int page, int pageSize)
@@ -45,9 +47,21 @@ namespace CapiControls.BLL.Services
             return Mapper.Map<IEnumerable<Questionnaire>, IEnumerable<QuestionnaireDTO>>(_uow.QuestionnaireRepository.GetAll(page, pageSize));
         }
 
+        public IEnumerable<QuestionnaireDTO> GetQuestionnairesByGroupName(string group)
+        {
+            var questionnaires = _uow.QuestionnaireRepository.GetAll().Where(q => q.Group == group).ToList();
+            return Mapper.Map<IEnumerable<Questionnaire>, IEnumerable<QuestionnaireDTO>>(questionnaires);
+        }
+
         public void UpdateQuestionnaire(QuestionnaireDTO questionnaire)
         {
             _uow.QuestionnaireRepository.Update(Mapper.Map<QuestionnaireDTO, Questionnaire>(questionnaire));
+            _uow.Commit();
+        }
+
+        public void DeleteQuestionnaire(Guid id)
+        {
+            _uow.QuestionnaireRepository.Delete(id);
             _uow.Commit();
         }
     }

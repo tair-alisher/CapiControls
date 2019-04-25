@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CapiControls.BLL\CapiControls.BLL.csproj" />
+    <ProjectReference Include="..\CapiControls.Controls\CapiControls.Controls.csproj" />
     <ProjectReference Include="..\CapiControls.DAL\CapiControls.DAL.csproj" />
   </ItemGroup>
 

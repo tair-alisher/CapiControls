@@ -30,7 +30,7 @@ namespace CapiControls.Web.Controllers
                 Items = groups
             };
 
-            return View(groups);
+            return View(listModel);
         }
 
         [HttpGet]

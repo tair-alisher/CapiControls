@@ -3,9 +3,11 @@ using CapiControls.BLL.Interfaces;
 using CapiControls.Controls.Common;
 using CapiControls.Controls.Interfaces;
 using Microsoft.AspNetCore.Hosting;
+using Novacode;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace CapiControls.Controls.Controls
 {
@@ -15,7 +17,7 @@ namespace CapiControls.Controls.Controls
         protected const string CatalogsDirectory = "Catalogs";
 
         protected const string FormString = "Форма";
-        protected const string IdentifierSring = "Идентификатор";
+        protected const string IdentifierString = "Идентификатор";
         protected const string SectionString = "Раздел";
         protected const string HouseholdCodeString = "Код домохозяйства";
         protected const string ErrorString = "Ошибка";
@@ -64,6 +66,22 @@ namespace CapiControls.Controls.Controls
                     }
                 }
             }
+        }
+
+        protected string GetQuestionnaireTitle(string identifier)
+        {
+            return QuestionnaireService.GetQuestionnaires()
+                .Where(q => q.Identifier == identifier)
+                .First()
+                .Title;
+        }
+
+        protected string CreateReportFile(string fileName)
+        {
+            string filePath = BuildFilePath(ReportsDirectory, $"{fileName}-" + DateTime.Now.ToString("yyyy.MM.dd-HH.mm") + ".docx");
+            DocX.Create(filePath).Save();
+
+            return filePath;
         }
     }
 }

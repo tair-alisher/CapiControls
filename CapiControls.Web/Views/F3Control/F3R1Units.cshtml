@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Контроль: Форма 3. Раздел 1. Единицы измерения.";
+}
+
+<h1>Контроль: Форма 3. Раздел 1. Единицы измерения.</h1>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="F3R1Units">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="questionnaireId">Опросник</label>
+                        <select name="questionnaireId" id="questionnaireId" asp-items="ViewBag.Questionnaires" class="form-control">
+                            <option selected="selected" disabled="disabled">Выберите опросник</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="region">Область</label>
+                        <select name="region" id="region" asp-items="ViewBag.Regions" class="form-control">
+                            <option selected="selected" value="">Выберите регион</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Проверить" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<a class="btn btn-secondary" asp-controller="Control" asp-action="Index">Назад</a>

@@ -1,6 +1,4 @@
 ﻿using CapiControls.Controls.Interfaces;
-using CapiControls.Data.Interfaces;
-using CapiControls.Models.Local;
 using CapiControls.Services.Interfaces;
 
 namespace CapiControls.Services.Local
@@ -10,7 +8,7 @@ namespace CapiControls.Services.Local
         private readonly IF3R1UnitsControl F3R1UnitsControl;
         private readonly IF3R2UnitsControl F3R2UnitsControl;
 
-        public F3ControlService(IPaginatedRepository<Questionnaire> questRepository, IF3R1UnitsControl f3r1unitsControl, IF3R2UnitsControl f3r2unitsControl)
+        public F3ControlService(IF3R1UnitsControl f3r1unitsControl, IF3R2UnitsControl f3r2unitsControl)
         {
             F3R1UnitsControl = f3r1unitsControl;
             F3R2UnitsControl = f3r2unitsControl;

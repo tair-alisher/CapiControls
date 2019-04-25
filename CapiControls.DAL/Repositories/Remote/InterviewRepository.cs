@@ -107,7 +107,7 @@ namespace CapiControls.DAL.Repositories.Remote
 
         public InterviewRepository(IDbTransaction transaction) : base(transaction) { }
 
-        public List<Interview> GetInterviewsByQuestionnaire(string questionnaireId, int offset, int limit)
+        public IEnumerable<RawInterviewData> GetInterviewsDataByQuestionnaire(string questionnaireId, int offset, int limit)
         {
             string query = DefaultSelect + DefaultFrom + DefaultWhere + DefaultOffsetLimit;
 
@@ -117,10 +117,10 @@ namespace CapiControls.DAL.Repositories.Remote
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 
-            return CollectInterviews(rawData);
+            return rawData;
         }
 
-        public List<Interview> GetInterviewsByQuestionnaireAndRegion(string questionnaireId, string region, int offset, int limit)
+        public IEnumerable<RawInterviewData> GetInterviewsDataByQuestionnaireAndRegion(string questionnaireId, string region, int offset, int limit)
         {
             string query = DefaultSelect + DefaultFrom + RegionWhere + DefaultOffsetLimit;
 
@@ -130,56 +130,10 @@ namespace CapiControls.DAL.Repositories.Remote
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 
-            return CollectInterviews(rawData);
+            return rawData;
         }
-
-        public List<Interview> CollectInterviews(IEnumerable<RawInterviewData> rawData)
-        {
-            var interviews = new List<Interview>();
-            Interview interview = null;
-            QuestionData questionData = null;
-            foreach (var row in rawData)
-            {
-                bool interviewAlreadyAdded = interviews.Where(i => i.Id == row.InterviewId).Count() > 0;
-
-                if (interviewAlreadyAdded)
-                {
-                    interview = interviews.Where(i => i.Id == row.InterviewId).First();
-                    questionData = new QuestionData
-                    {
-                        QuestionSection = row.QuestionSectionSuffix.Length > 0 ?
-                            $"{row.QuestionSection}_{row.QuestionSectionSuffix}" :
-                            row.QuestionSection,
-                        QuestionCode = row.QuestionCode,
-                        Answer = row.Answer
-                    };
-                    interview.QuestionData.Add(questionData);
-                }
-                else
-                {
-                    interview = new Interview
-                    {
-                        Id = row.InterviewId,
-                        QuestionnaireId = row.QuestionnaireId
-                    };
-                    questionData = new QuestionData
-                    {
-                        QuestionSection = row.QuestionSectionSuffix.Length > 0 ?
-                            $"{row.QuestionSection}_{row.QuestionSectionSuffix}" :
-                            row.QuestionSection,
-                        QuestionCode = row.QuestionCode,
-                        Answer = row.Answer
-                    };
-                    interview.QuestionData.Add(questionData);
-
-                    interviews.Add(interview);
-                }
-            }
-
-            return interviews;
-        }
-
-        public List<Interview> GetInterviewsByQuestionnaireAndQuestionCode(string questionnaireId, string questionCode, int offset, int limit)
+        
+        public IEnumerable<RawInterviewData> GetInterviewsDataByQuestionnaireAndQuestionCode(string questionnaireId, string questionCode, int offset, int limit)
         {
             string query = DefaultSelect + DefaultFrom + DefaultWhere + "\nand question_entity.stata_export_caption = @questionCode\n" + DefaultOffsetLimit;
 
@@ -189,7 +143,7 @@ namespace CapiControls.DAL.Repositories.Remote
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 
-            return CollectInterviews(rawData);
+            return rawData;
         }
 
         public string GetQuestionAnswerBySection(string interviewId, string questionCode, string section)
