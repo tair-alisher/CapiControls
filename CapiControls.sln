@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls.BLL", "CapiCon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls.Web", "CapiControls.Web\CapiControls.Web.csproj", "{A601584A-49EF-42A3-BC35-645D769B5972}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiControls.Controls", "CapiControls.Controls\CapiControls.Controls.csproj", "{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapiControls.Controls", "CapiControls.Controls\CapiControls.Controls.csproj", "{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiControls.BLL.Tests", "CapiControls.BLL.Tests\CapiControls.BLL.Tests.csproj", "{6F866626-A05D-43F9-A1EA-FD3E08E41E60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{935E85BC-D0E4-4CB4-AD4C-9016DE0CF76B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F866626-A05D-43F9-A1EA-FD3E08E41E60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F866626-A05D-43F9-A1EA-FD3E08E41E60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F866626-A05D-43F9-A1EA-FD3E08E41E60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F866626-A05D-43F9-A1EA-FD3E08E41E60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

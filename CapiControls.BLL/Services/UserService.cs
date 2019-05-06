@@ -39,7 +39,7 @@ namespace CapiControls.BLL.Services
             _uow.Commit();
         }
 
-        public string HashPassword(string password, string secret)
+        private string HashPassword(string password, string secret)
         {
             return Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: password,
