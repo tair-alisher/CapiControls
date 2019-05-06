@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CapiControls.BLL.DTO.Account;
+using CapiControls.BLL.Exceptions;
 using CapiControls.BLL.Interfaces;
 using CapiControls.BLL.Services;
 using CapiControls.Common.Mapping.Profiles;
@@ -19,6 +20,7 @@ namespace CapiControls.BLL.Tests
     public class UserService_Tests
     {
         IUserService UserService;
+        IMapper Mapper;
         int commits = 0;
         List<Role> RolesData;
         List<User> UsersData;
@@ -94,7 +96,7 @@ namespace CapiControls.BLL.Tests
                 .Returns((string login) => UsersData.Where(u => u.Login == login).Count() > 0);
             userRepository
                 .Setup(r => r.GetUserByLoginAndPassword(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns((string login, string password) => UsersData.Where(u => u.Login == login && u.Password == password).First());
+                .Returns((string login, string password) => UsersData.Where(u => u.Login == login && u.Password == password).FirstOrDefault());
             userRepository
                 .Setup(r => r.Update(It.IsAny<User>()))
                 .Callback((User item) =>
@@ -115,8 +117,11 @@ namespace CapiControls.BLL.Tests
                 {
                     UsersData.Where(u => u.Id == userId).First().Password = password;
                 });
+            userRepository
+                .Setup(r => r.Delete(It.IsAny<Guid>()))
+                .Callback((Guid id) => UsersData.Remove(UsersData.Where(u => u.Id == id).First()));
 
-            var mapper = new MapperConfiguration(cfg =>
+            Mapper = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new BLLProfile());
             }).CreateMapper();
@@ -129,7 +134,7 @@ namespace CapiControls.BLL.Tests
                 .Setup(uow => uow.Commit())
                 .Callback(() => commits++);
 
-            UserService = new UserService(mockUnitOfWork.Object, mapper);
+            UserService = new UserService(mockUnitOfWork.Object, Mapper);
         }
 
         private string HashPassword(string password, string secret)
@@ -329,25 +334,137 @@ namespace CapiControls.BLL.Tests
         [Fact]
         public void UpdateUser_UpdatesUserLoginAndName()
         {
-            throw new NotImplementedException();
+            // Arrange
+            int commitsBeforeAct = this.commits;
+            var userToUpdate = Mapper.Map<User, UserDTO>(UsersData.Last());
+            userToUpdate.Login = $"NewLogin{DateTime.Now}";
+            userToUpdate.UserName = $"NewUserName{DateTime.Now}";
+
+            // Act
+            UserService.UpdateUser(userToUpdate, new Guid[0]);
+            var updatedUser = UsersData.Last();
+
+            // Assert
+            Assert.True(commitsBeforeAct < this.commits);
+            Assert.Equal(userToUpdate.Login, updatedUser.Login);
+            Assert.Equal(userToUpdate.UserName, updatedUser.UserName);
+            Assert.True(updatedUser.Roles.Count() == 0);
         }
 
         [Fact]
         public void UpdateUser_DoesNotUpdatePassword()
         {
-            throw new NotImplementedException();
+            // Arrange
+            int commitsBeforeAct = this.commits;
+            var userToUpdate = Mapper.Map<User, UserDTO>(UsersData.Last());
+            userToUpdate.Password = $"NewPassword{DateTime.Now}";
+
+            // Act
+            UserService.UpdateUser(userToUpdate, new Guid[0]);
+            var updatedUser = UsersData.Last();
+
+            // Assert
+            Assert.NotEqual(userToUpdate.Password, updatedUser.Password);
+            Assert.Equal(userToUpdate.Login, updatedUser.Login);
         }
 
         [Fact]
         public void UpdateUser_AddsRoles_IfUserDoesNotHave()
         {
-            throw new NotImplementedException();
+            // Arrange
+            UsersData.Last().Roles.Clear();
+            var userToUpdate = Mapper.Map<User, UserDTO>(UsersData.Last());
+
+            // Act
+            UserService.UpdateUser(userToUpdate, new Guid[1] { RolesData.First().Id });
+            var updatedUser = UsersData.Last();
+
+            // Assert
+            Assert.True(updatedUser.Roles.Count() == 1);
+            Assert.True(updatedUser.Roles.First().Id == RolesData.First().Id);
         }
 
         [Fact]
         public void UpdateUser_RemovesRole_IfItIsNotInList()
         {
+            if (RolesData.Count() < 2)
+                throw new Exception("Not enough roles. Add roles.");
 
+            // Arrange
+            UsersData.Last().Roles.Clear();
+            foreach (var role in RolesData)
+                UsersData.Last().Roles.Add(role);
+
+            // Act
+            var userToUpdate = Mapper.Map<User, UserDTO>(UsersData.Last());
+            UserService.UpdateUser(userToUpdate, new Guid[1] { RolesData.First().Id });
+            var updatedUser = UsersData.Last();
+
+            // Assert
+            Assert.True(updatedUser.Roles.Count() == 1);
+            Assert.True(updatedUser.Roles.First().Id == RolesData.First().Id);
+        }
+
+        [Fact]
+        public void DeleteUser_DeletesUser()
+        {
+            // Arrange
+            int commitsBeforeAct = this.commits;
+            int usersAmountBeforeAct = UsersData.Count();
+            var userToDelete = UsersData.First();
+
+            // Act
+            UserService.DeleteUser(userToDelete.Id);
+
+            // Assert
+            Assert.True(commitsBeforeAct < this.commits);
+            Assert.True(UsersData.Count() < usersAmountBeforeAct);
+            Assert.DoesNotContain(UsersData, u => u.Id == userToDelete.Id);
+        }
+
+        [Fact]
+        public void UpdatePassword_WithWrongOldPassword_ThrowsWrongOldPasswordException()
+        {
+            // Arrange
+            var changePasswordData = new ChangePasswordDTO()
+            {
+                OldPassword = $"WronPassword{DateTime.Now}",
+                NewPassword = "NewPass",
+                Secret = "Secret"
+            };
+
+            // Act
+            Action act = () => UserService.UpdatePassword(UsersData.First().Login, changePasswordData);
+
+            // Assert
+            Assert.Throws<WrongOldPasswordException>(act);
+        }
+
+        [Fact]
+        public void UpdatePassword_WithCorrectOldPassword_UpdatesPassword()
+        {
+            // Arrange
+            var newUser = new User()
+            {
+                Id = Guid.NewGuid(),
+                Login = $"NewUserLogin{DateTime.Now}",
+                UserName = $"NewUserName{DateTime.Now}",
+                Password = HashPassword("NewPassword", "Secret")
+            };
+            UsersData.Add(newUser);
+            var changePasswordData = new ChangePasswordDTO()
+            {
+                OldPassword = "NewPassword",
+                NewPassword = "UpdatedPassword",
+                Secret = "Secret"
+            };
+
+            // Act
+            UserService.UpdatePassword(newUser.Login, changePasswordData);
+            var updatedUser = UsersData.Where(u => u.Id == newUser.Id).First();
+
+            // Assert
+            Assert.Equal(HashPassword(changePasswordData.NewPassword, changePasswordData.Secret), updatedUser.Password);
         }
     }
 }
