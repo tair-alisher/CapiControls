@@ -1,0 +1,29 @@
+﻿@model CapiControls.Web.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Авторизация";
+}
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <h1>Авторизация</h1>
+        <hr />
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label for="Login" class="control-label">Логин</label>
+                <input asp-for="Login" class="form-control" />
+                <span asp-validation-for="Login" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="Password" class="control-label">Пароль</label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Войти" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+

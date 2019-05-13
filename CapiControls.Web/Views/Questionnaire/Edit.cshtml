@@ -1,0 +1,40 @@
+﻿@model CapiControls.BLL.DTO.QuestionnaireDTO
+
+@{
+    ViewData["Title"] = "Редактировать опросник";
+}
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <h4>Редактировать опросник</h4>
+        <hr />
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label for="Identifier" class="control-label">Идентификатор</label>
+                <input asp-for="Identifier" class="form-control" />
+                <span asp-validation-for="Identifier" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="GroupId" class="control-label">Группа</label>
+                <select asp-for="GroupId" asp-items="ViewBag.Groups" class="form-control">
+                    <option selected="selected" disabled="disabled">Выберите группу</option>
+                </select>
+                <span asp-validation-for="GroupId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="Title" class="control-label">Наименование</label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Сохранить" class="btn btn-primary" />
+            </div>
+        </form>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
+        </div>
+    </div>
+</div>
+

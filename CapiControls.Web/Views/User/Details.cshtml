@@ -1,0 +1,34 @@
+﻿@model CapiControls.BLL.DTO.Account.UserDTO
+
+@{
+    ViewData["Title"] = "Данные о пользователе";
+}
+
+<h1>Данные о пользователе</h1>
+
+<div>
+    <table class="table-sm">
+        <tr>
+            <td><b>Логин</b></td>
+            <td>@Html.DisplayFor(model => model.Login)</td>
+        </tr>
+        <tr>
+            <td><b>Имя</b></td>
+            <td>@Html.DisplayFor(model => model.UserName)</td>
+        </tr>
+    </table>
+    <p><b>Роли</b></p>
+    <ul class="list-group">
+        @foreach (var role in Model.Roles)
+        {
+            <li class="list-group-item">@role.Title</li>
+        }
+    </ul>
+</div>
+<br />
+<div class="btn-group">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</div>
+
+

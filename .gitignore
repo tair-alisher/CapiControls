@@ -35,3 +35,4 @@ msbuild.wrn
 
 CapiControls/appsettings.json
 CapiControls/Files/*
+CapiControls.Web/Files/*

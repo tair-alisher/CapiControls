@@ -1,0 +1,40 @@
+﻿@model CapiControls.BLL.DTO.Account.UserDTO
+
+@{
+    ViewData["Title"] = "Редактировать данные";
+}
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <h4>Редактировать данные</h4>
+        <hr />
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label for="Login" class="control-label">Логин</label>
+                <input asp-for="Login" class="form-control" />
+                <span asp-validation-for="Login" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="UserName" class="control-label">Имя</label>
+                <input asp-for="UserName" class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <p>Роли</p>
+                @foreach (var role in ViewBag.Roles)
+                {
+                    <input type="checkbox" name="roles[]" value="@role.Id" @(Model.Roles.Where(r => r.Name == role.Name).Count() > 0 ? "checked" : "") />@role.Title<br />
+                }
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Сохранить" class="btn btn-primary" />
+            </div>
+        </form>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">Назад</a>
+        </div>
+    </div>
+</div>
+
+
