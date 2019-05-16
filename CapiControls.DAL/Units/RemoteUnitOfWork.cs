@@ -8,6 +8,7 @@ namespace CapiControls.DAL.Units
     {
         private IInterviewRepository _interviewRepository;
         private IForm3Repository _form3Repository;
+        private IForm1Repository _form1Repository;
 
         public RemoteUnitOfWork(string connectionString) : base(connectionString) { }
 
@@ -24,6 +25,14 @@ namespace CapiControls.DAL.Units
             get
             {
                 return _form3Repository ?? (_form3Repository = new Form3Repository(Transaction));
+            }
+        }
+
+        public IForm1Repository Form1Repository
+        {
+            get
+            {
+                return _form1Repository ?? (_form1Repository = new Form1Repository(Transaction));
             }
         }
 

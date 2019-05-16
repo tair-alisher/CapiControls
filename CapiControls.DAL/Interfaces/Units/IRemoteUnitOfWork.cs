@@ -6,5 +6,6 @@ namespace CapiControls.DAL.Interfaces.Units
     {
         IInterviewRepository InterviewRepository { get; }
         IForm3Repository Form3Repository { get; }
+        IForm1Repository Form1Repository { get; }
     }
 }

@@ -17,6 +17,7 @@ namespace CapiControls.DAL.Repositories.Remote
                 + base.DefaultFrom
                 + (region == null ? base.DefaultWhere : base.RegionWhere)
                 + "and question_entity.stata_export_caption = 'f3r1q6'\n"
+                + base.DefaultOrder
                 + base.DefaultOffsetLimit;
 
             var rawData = Connection.Query<RawInterviewData>(
@@ -34,6 +35,7 @@ namespace CapiControls.DAL.Repositories.Remote
                 + base.DefaultFrom
                 + (region == null ? base.DefaultWhere : base.RegionWhere)
                 + "and (question_entity.stata_export_caption like 'f3r2q5b%' or question_entity.stata_export_caption = 'f3r2nenaideno')\n"
+                + base.DefaultOrder
                 + base.DefaultOffsetLimit;
 
             var rawData = Connection.Query<RawInterviewData>(
