@@ -11,5 +11,6 @@ namespace CapiControls.DAL.Interfaces.Repositories
         Task<string> GetMemberBirthDate(string interviewId, string section);
         Task<string> GetMemberMaritalStatus(string interviewId, string section);
         Task<bool> HasMemberSpouse(string interviewId);
+        Task<bool> IsMemberAbsenceReasonAnswered(string interviewId, string section);
     }
 }

@@ -39,7 +39,7 @@ namespace CapiControls.DAL.Repositories.Remote
 	and question_entity.stata_export_caption = 'dateF'
 limit 1";
 
-            return await Connection.QueryFirstAsync<string>(query, param: new { interviewId });
+            return await Connection.QueryFirstOrDefaultAsync<string>(query, param: new { interviewId });
         }
 
         public async Task<string> GetMemberBirthDate(string interviewId, string section)
@@ -51,7 +51,7 @@ limit 1";
 	and question_entity.stata_export_caption = 'f1r1q6'
 limit 1";
 
-            return await Connection.QueryFirstAsync<string>(
+            return await Connection.QueryFirstOrDefaultAsync<string>(
                 query,
                 param: new { interviewId, sectionSuffix = section.Split('_')[1] });
         }
@@ -95,11 +95,27 @@ limit 1";
     and interview.rostervector != '1'
 limit 1";
 
-            string spouse = await Connection.QueryFirstAsync<string>(
+            string spouse = await Connection.QueryFirstOrDefaultAsync<string>(
                 query,
                 param: new { interviewId });
 
-            return string.IsNullOrEmpty(spouse);
+            return !string.IsNullOrEmpty(spouse);
+        }
+
+        public async Task<bool> IsMemberAbsenceReasonAnswered(string interviewId, string section)
+        {
+            string query = AnswerSelect
+                + AnswerFrom
+                + @"where summary.summaryid = @interviewId
+    and question_entity.stata_export_caption = 'f1r1q5'
+    and interview.rostervector = @sectionSuffix
+limit 1";
+
+            string memberAbsenceReason = await Connection.QueryFirstOrDefaultAsync<string>(
+                query,
+                param: new { interviewId, sectionSuffix = section.Split('_')[1] });
+
+            return !string.IsNullOrEmpty(memberAbsenceReason);
         }
     }
 }

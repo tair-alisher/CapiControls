@@ -1,6 +1,7 @@
 ﻿using CapiControls.BLL.Interfaces;
 using CapiControls.Controls.Common;
 using CapiControls.Controls.Interfaces.Form3;
+using CapiControls.DAL.Interfaces.Units;
 using Microsoft.AspNetCore.Hosting;
 using Novacode;
 using System.Linq;
@@ -9,19 +10,19 @@ namespace CapiControls.Controls.Controls.Form3
 {
     public class F3R2unitsControl : BaseControl, IF3R2UnitsControl
     {
-        private readonly IForm3Service _formService;
+        private readonly IRemoteUnitOfWork _uow;
         private readonly IInterviewService _interviewService;
 
         private string _reportFilePath;
         private string _questionnaireTitle;
 
         public F3R2unitsControl(
-            IForm3Service formService,
+            IRemoteUnitOfWork uow,
             IInterviewService interviewService,
             IQuestionnaireService questionnaireService,
             IHostingEnvironment hostEnv) : base(questionnaireService, hostEnv)
         {
-            _formService = formService;
+            _uow = uow;
             _interviewService = interviewService;
         }
 
@@ -39,9 +40,10 @@ namespace CapiControls.Controls.Controls.Form3
         {
             ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
 
-            var interviews = _formService
-                .GetF3R2UnitsInterviewsByQuestionnaire(questionnaireId, offset, limit, region)
+            var rawInterviewsData = _uow.Form3Repository
+                .GetF3R2UnitsInterviewsData(questionnaireId, offset, limit, region)
                 .ToList();
+            var interviews = _interviewService.CollectInterviews(rawInterviewsData);
 
             if (!(interviews.Count <= 0))
             {

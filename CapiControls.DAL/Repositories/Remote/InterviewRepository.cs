@@ -37,7 +37,8 @@ namespace CapiControls.DAL.Repositories.Remote
         , cast(interview.asaudio as varchar)
         , cast(interview.asarea as varchar)
         , ''
-) as Answer";
+) as Answer
+";
             }
         }
 
@@ -60,7 +61,8 @@ namespace CapiControls.DAL.Repositories.Remote
     , cast(interview.asaudio as varchar)
     , cast(interview.asarea as varchar)
     , ''
-) as Answer";
+) as Answer
+";
             }
         }
 
@@ -76,7 +78,8 @@ namespace CapiControls.DAL.Repositories.Remote
     join readside.questionnaire_entities as question_entity
         on interview.entityid = question_entity.id
     join readside.interviewcommentaries as interview_info
-        on summary.summaryid = interview_info.id";
+        on summary.summaryid = interview_info.id
+";
             }
         }
 
@@ -90,7 +93,8 @@ namespace CapiControls.DAL.Repositories.Remote
     join readside.interviewsummaries as summary
         on interview_id.interviewid = summary.interviewid
     join readside.questionnaire_entities as question_entity
-        on interview.entityid = question_entity.id";
+        on interview.entityid = question_entity.id
+";
             }
         }
 
@@ -104,7 +108,7 @@ namespace CapiControls.DAL.Repositories.Remote
     and interview_info.isapprovedbyhq = false
     and summary.wasrejectedbysupervisor = false
     and summary.questionnaireidentity = @questionnaireId
-                ";
+";
             }
         }
 
@@ -128,9 +132,7 @@ namespace CapiControls.DAL.Repositories.Remote
         {
             get
             {
-                return @"offset @offset
-limit @limit
-                ";
+                return "offset @offset limit @limit\n";
             }
         }
 

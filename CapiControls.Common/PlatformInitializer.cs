@@ -39,8 +39,6 @@ namespace CapiControls.Common
             services.AddScoped<IRegionService, RegionService>();
 
             services.AddScoped<IInterviewService, InterviewService>();
-            services.AddScoped<IForm3Service, Form3Service>();
-            services.AddScoped<IForm1Service, Form1Service>();
 
             services.AddScoped<IF3R1UnitsControl, F3R1UnitsControl>();
             services.AddScoped<IF3R2UnitsControl, F3R2unitsControl>();
