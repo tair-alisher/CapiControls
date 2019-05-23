@@ -49,66 +49,69 @@ namespace CapiControls.Controls.Controls.Form1
             {
                 using (var file = DocX.Load(_reportFilePath))
                 {
-                    string error, hhCode, key;
-                    bool isAgeValid, isPresenceValid;
+                    string memberName, error;
+                    bool isAgeValid, isHeadmanDroppedOut;
                     foreach (var interview in interviews)
                     {
                         foreach (var questionData in interview.QuestionData)
                         {
-                            error = "";
+                            memberName = await _uow.Form1Repository.GetCurrentMemberName(interview.Id, questionData.QuestionSection.Split('_')[1]);
+                            error = null;
+                            isHeadmanDroppedOut = await _uow.Form1Repository.IsHeadmanDroppedOut(interview.Id, questionData.QuestionSection);
                             switch (questionData.QuestionCode)
                             {
                                 // отношение к главе домохозяйства
                                 case "f1r1q3":
                                     if (questionData.Answer == "1")
                                     {
-                                        bool isMaritalStatusValid = await CheckMaritalStatus(interview.Id, questionData.QuestionSection);
-                                        if (!isMaritalStatusValid)
-                                            error = "Связь Муж/Жена";
+                                       try
+                                        {
+                                            bool isMaritalStatusValid = await CheckMaritalStatus(interview.Id, questionData.QuestionSection);
+                                            if (!isMaritalStatusValid)
+                                                error = $"{memberName}. Связь Муж/Жена";
+                                        }
+                                        catch (MaritalStatusNotAnsweredException)
+                                        {
+                                            error = $"{memberName}. Семейное положение без ответа";
+                                        }
                                     }
                                     break;
                                 // лет на момент опроса члена домохозяйства
                                 // дата рождения - заполняемость
                                 // дата проведения интервью - заполняемость
                                 case "f1r1q7":
-                                    try
+                                    if (!isHeadmanDroppedOut)
                                     {
-                                        isAgeValid = await CheckAge(interview.Id, questionData.QuestionSection, questionData.Answer);
-                                        if (!isAgeValid)
-                                            error = "Число полных лет на момент опроса";
-                                    }
-                                    catch (MemberBirthDateIsNullException)
-                                    {
-                                        error = "Не указана дата рождения члена домохозяйства";
-                                    }
-                                    catch (InterviewDateIsNullException)
-                                    {
-                                        error = "Не указана фактическая дата проведения интервью";
+                                        try
+                                        {
+                                            isAgeValid = await CheckAge(interview.Id, questionData.QuestionSection, questionData.Answer);
+                                            if (!isAgeValid)
+                                                error = $"{memberName}. Число полных лет на момент опроса";
+                                        }
+                                        catch (MemberDroppedOutException) { break; }
+                                        catch (MemberBirthDateIsNullException ex) { error = $"{memberName}. {ex.Message}"; }
+                                        catch (InterviewDateIsNullException ex) { error = $"{memberName}. {ex.Message}"; }
                                     }
                                     break;
                                 // проживает ли в домохозяйстве
                                 case "f1r1q4":
-                                    isPresenceValid = await CheckPresenceInHousehold(interview.Id, questionData.QuestionSection, questionData.Answer);
-                                    if (!isPresenceValid)
-                                        error = "Является ли проживающим/причина отсутствия";
+                                    // break if member is headman and is dropped out
+                                    if (isHeadmanDroppedOut)
+                                        break;
+
+                                    // is presence not valid
+                                    if (!(await CheckPresenceInHousehold(interview.Id, questionData.QuestionSection, questionData.Answer)))
+                                        error = $"{memberName}. Является ли проживающим/причина отсутствия";
                                     break;
-                            }
+                            } // switch end
 
+                            // write the error to the file
                             if (!string.IsNullOrEmpty(error))
-                            {
-                                hhCode = _interviewService.GetQuestionFirstAnswer(interview.Id, "hhCode");
-                                key = _interviewService.GetInterviewKey(interview.Id);
-
-                                file.InsertParagraph($"{FormString}: {_questionnaireTitle}.");
-                                file.InsertParagraph($"{IdentifierString}: {key}.");
-                                file.InsertParagraph($"{SectionString}: 2.");
-                                file.InsertParagraph($"{HouseholdCodeString}: {hhCode}.");
-                                file.InsertParagraph($"{ErrorString}: {error}.");
-                                file.InsertParagraph();
-                            }
+                                WriteErrorToFile(file, interview.Id, error);
                         }
                     }
 
+                    // save the file
                     file.Save();
                 }
 
@@ -116,11 +119,30 @@ namespace CapiControls.Controls.Controls.Form1
             }
         }
 
+        private void WriteErrorToFile(DocX file, string interviewId, string error)
+        {
+            string hhCode = _interviewService.GetQuestionFirstAnswer(interviewId, "hhCode");
+            string key = _interviewService.GetInterviewKey(interviewId);
+
+            file.InsertParagraph($"{FormString}: {_questionnaireTitle}.");
+            file.InsertParagraph($"{IdentifierString}: {key}.");
+            file.InsertParagraph($"{SectionString}: 2.");
+            file.InsertParagraph($"{HouseholdCodeString}: {hhCode}.");
+            file.InsertParagraph($"{ErrorString}: {error}.");
+            file.InsertParagraph();
+        }
+
         private async Task<bool> CheckAge(string interviewId, string section, string strAge)
         {
             string birthDateStr = await _uow.Form1Repository.GetMemberBirthDate(interviewId, section);
             if (string.IsNullOrEmpty(birthDateStr))
-                throw new MemberBirthDateIsNullException();
+            {
+                bool isDroppedOut = await _uow.Form1Repository.IsMemberDroppedOut(interviewId, section);
+                if (isDroppedOut)
+                    throw new MemberDroppedOutException();
+                else
+                    throw new MemberBirthDateIsNullException();
+            }
 
             string interviewDateStr = await _uow.Form1Repository.GetInterviewDate(interviewId);
             if (string.IsNullOrEmpty(interviewDateStr))
@@ -135,7 +157,12 @@ namespace CapiControls.Controls.Controls.Form1
 
         private async Task<bool> CheckMaritalStatus(string interviewId, string section)
         {
-            int maritalStatus = int.Parse(await _uow.Form1Repository.GetMemberMaritalStatus(interviewId, section));
+            string result = await _uow.Form1Repository.GetMemberMaritalStatus(interviewId, section);
+            if (string.IsNullOrEmpty(result))
+                throw new MaritalStatusNotAnsweredException();
+
+            int maritalStatus = int.Parse(result);
+
             int[] hasSpouseOptions = new int[3] { 1, 2, 4 };
 
             bool hasSpouse = await _uow.Form1Repository.HasMemberSpouse(interviewId);
