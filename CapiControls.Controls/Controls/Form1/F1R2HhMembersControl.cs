@@ -1,10 +1,12 @@
-﻿using CapiControls.BLL.Exceptions;
+﻿using CapiControls.BLL.DTO;
+using CapiControls.BLL.Exceptions;
 using CapiControls.BLL.Interfaces;
 using CapiControls.Controls.Interfaces.Form1;
 using CapiControls.DAL.Interfaces.Units;
 using Microsoft.AspNetCore.Hosting;
 using Novacode;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,13 +40,8 @@ namespace CapiControls.Controls.Controls.Form1
             return _reportFilePath;
         }
 
-        private async Task Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
+        private async Task CheckInterviews(List<InterviewDTO> interviews, IterationData iterationData)
         {
-            var rawInterviewsData = _uow.Form1Repository
-                .GetF1R2Interviews(questionnaireId, offset, limit, region)
-                .ToList();
-            var interviews = _interviewService.CollectInterviews(rawInterviewsData);
-
             if (!(interviews.Count <= 0))
             {
                 using (var file = DocX.Load(_reportFilePath))
@@ -64,7 +61,7 @@ namespace CapiControls.Controls.Controls.Form1
                                 case "f1r1q3":
                                     if (questionData.Answer == "1")
                                     {
-                                       try
+                                        try
                                         {
                                             bool isMaritalStatusValid = await CheckMaritalStatus(interview.Id, questionData.QuestionSection);
                                             if (!isMaritalStatusValid)
@@ -115,8 +112,30 @@ namespace CapiControls.Controls.Controls.Form1
                     file.Save();
                 }
 
-                await Execute(questionnaireId, region, offset += 1000);
+                await Execute(iterationData.QuestionnaireId, iterationData.Region, iterationData.Offset += 1000);
             }
+        }
+
+        private async Task Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
+        {
+            var rawInterviewsData = _uow.Form1Repository
+                .GetF1R2Interviews(questionnaireId, offset, limit, region)
+                .ToList();
+
+            var iterationData = new IterationData
+            {
+                QuestionnaireId = questionnaireId,
+                Region = region,
+                Offset = offset
+            };
+            var interviews = FormInterviews(iterationData);
+            await CheckInterviews(interviews, iterationData);
+        }
+
+        private List<InterviewDTO> FormInterviews(IterationData iterationData)
+        {
+            return _interviewService.CollectInterviews(
+                _uow.Form1Repository.GetF1R2Interviews(iterationData.QuestionnaireId, iterationData.Offset, iterationData.Limit, iterationData.Region));
         }
 
         private void WriteErrorToFile(DocX file, string interviewId, string error)
@@ -179,5 +198,13 @@ namespace CapiControls.Controls.Controls.Form1
             // иначе, необходимо указать причину отсутствия
             return answer == "1" ? !isMemberAbsenceReasonAnswered : isMemberAbsenceReasonAnswered;
         }
+    }
+
+    internal class IterationData
+    {
+        public string QuestionnaireId { get; set; }
+        public string Region { get; set; }
+        public int Limit { get; set; }
+        public int Offset { get; set; }
     }
 }
