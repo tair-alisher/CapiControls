@@ -1,6 +1,6 @@
 ﻿namespace CapiControls.Controls.Common
 {
-    public class Product
+    internal class Product
     {
         public string Code { get; set; }
         public string Name { get; set; }

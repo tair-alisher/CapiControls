@@ -27,7 +27,7 @@ namespace CapiControls.Controls.Controls
         protected readonly IQuestionnaireService QuestionnaireService;
         private readonly IHostingEnvironment _hostEnv;
 
-        protected List<Product> Products;
+        internal List<Product> Products;
 
         public BaseControl(IQuestionnaireService questionnaireService, IHostingEnvironment hostEnv)
         {
