@@ -13,9 +13,6 @@ namespace CapiControls.Controls.Controls.Form3
         private readonly IRemoteUnitOfWork _uow;
         private readonly IInterviewService _interviewService;
 
-        private string _reportFilePath;
-        private string _questionnaireTitle;
-
         public F3R1UnitsControl(
             IRemoteUnitOfWork uow,
             IInterviewService interviewService,

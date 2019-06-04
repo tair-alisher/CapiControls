@@ -1,6 +1,6 @@
-﻿namespace CapiControls.Controls.Common
+﻿namespace CapiControls.DAL.Common
 {
-    internal class IterationData
+    public class QueryParams
     {
         public string QuestionnaireId { get; set; }
         public string Region { get; set; }

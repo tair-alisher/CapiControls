@@ -18,9 +18,6 @@ namespace CapiControls.Controls.Controls.Form1
         private readonly IRemoteUnitOfWork _uow;
         private readonly IInterviewService _interviewService;
 
-        private string _reportFilePath;
-        private string _questionnaireTitle;
-
         public F1R2HhMembersControl(
             IRemoteUnitOfWork uow,
             IInterviewService interviewService,
@@ -51,8 +48,8 @@ namespace CapiControls.Controls.Controls.Form1
             {
                 QuestionnaireId = questionnaireId,
                 Region = region,
-                Limit = limit,
-                Offset = offset
+                Offset = offset,
+                Limit = limit
             };
 
             await CheckInterviews(iterationData);

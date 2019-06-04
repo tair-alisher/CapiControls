@@ -42,6 +42,7 @@ namespace CapiControls.Common
 
             services.AddScoped<IF3R1UnitsControl, F3R1UnitsControl>();
             services.AddScoped<IF3R2UnitsControl, F3R2unitsControl>();
+            services.AddScoped<IF3R2SupplySourcesControl, F3R2SupplySourcesControl>();
             services.AddScoped<IF3Controls, F3Controls>();
 
             services.AddScoped<IF1R2HhMembersControl, F1R2HhMembersControl>();

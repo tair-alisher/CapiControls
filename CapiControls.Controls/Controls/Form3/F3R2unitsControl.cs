@@ -13,9 +13,6 @@ namespace CapiControls.Controls.Controls.Form3
         private readonly IRemoteUnitOfWork _uow;
         private readonly IInterviewService _interviewService;
 
-        private string _reportFilePath;
-        private string _questionnaireTitle;
-
         public F3R2unitsControl(
             IRemoteUnitOfWork uow,
             IInterviewService interviewService,
@@ -38,7 +35,8 @@ namespace CapiControls.Controls.Controls.Form3
 
         private void Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
         {
-            ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
+            if (Products == null || Products.Count <= 0)
+                ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
 
             var rawInterviewsData = _uow.Form3Repository
                 .GetF3R2UnitsInterviewsData(questionnaireId, offset, limit, region)

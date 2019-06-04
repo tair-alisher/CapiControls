@@ -1,7 +1,5 @@
-﻿using CapiControls.BLL.DTO;
-using CapiControls.BLL.Interfaces;
+﻿using CapiControls.BLL.Interfaces;
 using CapiControls.Controls.Common;
-using CapiControls.Controls.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Novacode;
 using System;
@@ -13,6 +11,9 @@ namespace CapiControls.Controls.Controls
 {
     public class BaseControl
     {
+        protected string _reportFilePath;
+        protected string _questionnaireTitle;
+
         protected const string ReportsDirectory = "Reports";
         protected const string CatalogsDirectory = "Catalogs";
 
@@ -27,7 +28,7 @@ namespace CapiControls.Controls.Controls
         protected readonly IQuestionnaireService QuestionnaireService;
         private readonly IHostingEnvironment _hostEnv;
 
-        internal List<Product> Products;
+        internal List<Product> Products = null;
 
         public BaseControl(IQuestionnaireService questionnaireService, IHostingEnvironment hostEnv)
         {
@@ -49,7 +50,7 @@ namespace CapiControls.Controls.Controls
             {
                 using (var reader = new StreamReader(fileStream))
                 {
-                    string line, code, name;
+                    string line, code, gskpCode, name;
                     string[] lineParts, units;
                     Product product;
 
@@ -59,8 +60,9 @@ namespace CapiControls.Controls.Controls
 
                         code = lineParts[0];
                         name = lineParts[1];
+                        gskpCode = lineParts[2];
                         units = lineParts[3].Split('/');
-                        product = new Product(code, name, units);
+                        product = new Product(code, name, gskpCode, units);
 
                         Products.Add(product);
                     }

@@ -1,4 +1,5 @@
-﻿using CapiControls.DAL.Entities;
+﻿using CapiControls.DAL.Common;
+using CapiControls.DAL.Entities;
 using CapiControls.DAL.Interfaces.Repositories;
 using Dapper;
 using System.Collections.Generic;
@@ -41,6 +42,29 @@ namespace CapiControls.DAL.Repositories.Remote
             var rawData = Connection.Query<RawInterviewData>(
                 query,
                 param: new { questionnaireId, region, offset, limit },
+                transaction: Transaction
+            ) ?? Enumerable.Empty<RawInterviewData>();
+
+            return rawData;
+        }
+
+        public IEnumerable<RawInterviewData> GetF3R2SupplySourcesInterviewsData(QueryParams parameters)
+        {
+            string query = base.DefaultSelect
+                + base.DefaultFrom
+                + (parameters.Region == null ? base.DefaultWhere : base.RegionWhere)
+                + "and question_entity.stata_export_caption like 'f3r2q6b%'\n"
+                + base.DefaultOrder
+                + base.DefaultOffsetLimit;
+
+            var rawData = Connection.Query<RawInterviewData>(
+                query,
+                param: new {
+                    questionnaireId = parameters.QuestionnaireId,
+                    region = parameters.Region,
+                    offset = parameters.Offset,
+                    limit = parameters.Limit
+                },
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 
