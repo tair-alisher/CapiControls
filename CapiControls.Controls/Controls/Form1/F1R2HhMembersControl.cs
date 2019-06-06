@@ -15,18 +15,17 @@ namespace CapiControls.Controls.Controls.Form1
 {
     public class F1R2HhMembersControl : BaseControl, IF1R2HhMembersControl
     {
-        private readonly IRemoteUnitOfWork _uow;
-        private readonly IInterviewService _interviewService;
+        protected override string SectionNumber
+        {
+            get { return "2"; }
+        }
 
         public F1R2HhMembersControl(
             IRemoteUnitOfWork uow,
             IInterviewService interviewService,
             IQuestionnaireService questionnaireService,
-            IHostingEnvironment hostEnv) : base(questionnaireService, hostEnv)
-        {
-            _uow = uow;
-            _interviewService = interviewService;
-        }
+            IHostingEnvironment hostEnv) : base(uow, questionnaireService, interviewService, hostEnv)
+        { }
 
         public async Task<string> Execute(string questionnaireId, string region = null)
         {
@@ -40,7 +39,7 @@ namespace CapiControls.Controls.Controls.Form1
 
         private async Task Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
         {
-            var rawInterviewsData = _uow.Form1Repository
+            var rawInterviewsData = Uow.Form1Repository
                 .GetF1R2Interviews(questionnaireId, offset, limit, region)
                 .ToList();
 
@@ -75,8 +74,8 @@ namespace CapiControls.Controls.Controls.Form1
 
         private List<InterviewDTO> FormInterviews(IterationData iterationData)
         {
-            return _interviewService.CollectInterviews(
-                _uow.Form1Repository.GetF1R2Interviews(iterationData.QuestionnaireId, iterationData.Offset, iterationData.Limit, iterationData.Region));
+            return base.InterviewService.CollectInterviews(
+                Uow.Form1Repository.GetF1R2Interviews(iterationData.QuestionnaireId, iterationData.Offset, iterationData.Limit, iterationData.Region));
         }
 
         private async Task CheckInterview(InterviewDTO interview, DocX file)
@@ -87,28 +86,15 @@ namespace CapiControls.Controls.Controls.Form1
                 error = await CheckAnswer(interview, questionData);
 
                 if (!string.IsNullOrEmpty(error))
-                    WriteErrorToFile(file, interview.Id, error);
+                    WriteErrorToFile(file, interview.Id, error, SectionNumber);
             }
-        }
-
-        private void WriteErrorToFile(DocX file, string interviewId, string error)
-        {
-            string hhCode = _interviewService.GetQuestionFirstAnswer(interviewId, "hhCode");
-            string key = _interviewService.GetInterviewKey(interviewId);
-
-            file.InsertParagraph($"{FormString}: {_questionnaireTitle}.");
-            file.InsertParagraph($"{IdentifierString}: {key}.");
-            file.InsertParagraph($"{SectionString}: 2.");
-            file.InsertParagraph($"{HouseholdCodeString}: {hhCode}.");
-            file.InsertParagraph($"{ErrorString}: {error}.");
-            file.InsertParagraph();
         }
 
         private async Task<string> CheckAnswer(InterviewDTO interview, QuestionDataDTO questionData)
         {
             string error = "";
-            string memberName = await _uow.Form1Repository.GetCurrentMemberName(interview.Id, questionData.QuestionSection.Split('_')[1]);
-            bool isHeadmanDroppedOut = await _uow.Form1Repository.IsHeadmanDroppedOut(interview.Id, questionData.QuestionSection);
+            string memberName = await Uow.Form1Repository.GetCurrentMemberName(interview.Id, questionData.QuestionSection.Split('_')[1]);
+            bool isHeadmanDroppedOut = await Uow.Form1Repository.IsHeadmanDroppedOut(interview.Id, questionData.QuestionSection);
 
             switch (questionData.QuestionCode)
             {
@@ -151,7 +137,7 @@ namespace CapiControls.Controls.Controls.Form1
 
         private async Task<bool> IsMaritalStatusValid(string interviewId, string section)
         {
-            string result = await _uow.Form1Repository.GetMemberMaritalStatus(interviewId, section);
+            string result = await Uow.Form1Repository.GetMemberMaritalStatus(interviewId, section);
             if (string.IsNullOrEmpty(result))
                 throw new MaritalStatusNotAnsweredException();
 
@@ -159,7 +145,7 @@ namespace CapiControls.Controls.Controls.Form1
 
             int[] hasSpouseOptions = new int[3] { 1, 2, 4 };
 
-            bool hasSpouse = await _uow.Form1Repository.HasMemberSpouse(interviewId);
+            bool hasSpouse = await Uow.Form1Repository.HasMemberSpouse(interviewId);
 
             // если у главы есть супруг, должна быть информаци я о нем (супруге)
             return hasSpouseOptions.Contains(maritalStatus) ? hasSpouse : !hasSpouse;
@@ -167,14 +153,14 @@ namespace CapiControls.Controls.Controls.Form1
 
         private async Task<string> CheckAge(string interviewId, string memberName, string section, string strAge)
         {
-            if (await _uow.Form1Repository.IsMemberDroppedOut(interviewId, section))
+            if (await Uow.Form1Repository.IsMemberDroppedOut(interviewId, section))
                 return string.Empty;
 
-            var birthDateStr = await _uow.Form1Repository.GetMemberBirthDate(interviewId, section);
+            var birthDateStr = await Uow.Form1Repository.GetMemberBirthDate(interviewId, section);
             if (string.IsNullOrEmpty(birthDateStr))
                 return $"{memberName}. Не указана дата рождения члена домохозяйства.\n\tНевозможно проверить число полных лет на момент опроса";
 
-            var interviewDateStr = await _uow.Form1Repository.GetInterviewDate(interviewId);
+            var interviewDateStr = await Uow.Form1Repository.GetInterviewDate(interviewId);
             if (string.IsNullOrEmpty(interviewDateStr))
                 return $"{memberName}. Не указана фактическая дата проведения интервью.\n\tНевозможно проверить число полных лет на момент опроса";
 
@@ -190,7 +176,7 @@ namespace CapiControls.Controls.Controls.Form1
         private async Task<string> CheckPresenceInHousehold(string interviewId, string memberName, string section, string answer)
         {
             string error = $"{memberName}. Является ли проживающим/причина отсутствия";
-            bool isMemberAbsenceReasonAnswered = await _uow.Form1Repository.IsMemberAbsenceReasonAnswered(interviewId, section);
+            bool isMemberAbsenceReasonAnswered = await Uow.Form1Repository.IsMemberAbsenceReasonAnswered(interviewId, section);
 
             if (answer == "1") // если человек проживает в домохозяйстве
             {

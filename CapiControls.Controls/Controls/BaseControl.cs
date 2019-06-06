@@ -1,5 +1,6 @@
 ﻿using CapiControls.BLL.Interfaces;
 using CapiControls.Controls.Common;
+using CapiControls.DAL.Interfaces.Units;
 using Microsoft.AspNetCore.Hosting;
 using Novacode;
 using System;
@@ -9,30 +10,33 @@ using System.Linq;
 
 namespace CapiControls.Controls.Controls
 {
-    public class BaseControl
+    public abstract class BaseControl
     {
+        protected abstract string SectionNumber { get; }
+        internal List<Product> Products = null;
+
         protected string _reportFilePath;
         protected string _questionnaireTitle;
 
         protected const string ReportsDirectory = "Reports";
         protected const string CatalogsDirectory = "Catalogs";
 
-        protected const string FormString = "Форма";
-        protected const string IdentifierString = "Идентификатор";
-        protected const string SectionString = "Раздел";
-        protected const string HouseholdCodeString = "Код домохозяйства";
-        protected const string ErrorString = "Ошибка";
-
         protected const string ProdInfoFileName = "ProdUnits.txt";
 
+        protected readonly IRemoteUnitOfWork Uow;
         protected readonly IQuestionnaireService QuestionnaireService;
+        protected readonly IInterviewService InterviewService;
         private readonly IHostingEnvironment _hostEnv;
 
-        internal List<Product> Products = null;
-
-        public BaseControl(IQuestionnaireService questionnaireService, IHostingEnvironment hostEnv)
+        public BaseControl(
+            IRemoteUnitOfWork uow,
+            IQuestionnaireService questionnaireService,
+            IInterviewService interviewService,
+            IHostingEnvironment hostEnv)
         {
+            Uow = uow;
             QuestionnaireService = questionnaireService;
+            InterviewService = interviewService;
             _hostEnv = hostEnv;
         }
 
@@ -84,6 +88,19 @@ namespace CapiControls.Controls.Controls
             DocX.Create(filePath).Save();
 
             return filePath;
+        }
+
+        protected void WriteErrorToFile(DocX file, string interviewId, string error, string sectionNumber)
+        {
+            string hhCode = InterviewService.GetQuestionFirstAnswer(interviewId, "hhCode");
+            string key = InterviewService.GetInterviewKey(interviewId);
+
+            file.InsertParagraph($"Форма: {_questionnaireTitle}.");
+            file.InsertParagraph($"Идентификатор: {key}.");
+            file.InsertParagraph($"Раздел: {sectionNumber}.");
+            file.InsertParagraph($"Код домохозяйства: {hhCode}.");
+            file.InsertParagraph($"Ошибка: {error}.");
+            file.InsertParagraph();
         }
     }
 }

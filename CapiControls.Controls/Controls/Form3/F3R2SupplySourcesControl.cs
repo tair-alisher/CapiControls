@@ -13,8 +13,10 @@ namespace CapiControls.Controls.Controls.Form3
 {
     public class F3R2SupplySourcesControl : BaseControl, IF3R2SupplySourcesControl
     {
-        private readonly IRemoteUnitOfWork _uow;
-        private readonly IInterviewService _interviewService;
+        protected override string SectionNumber
+        {
+            get { return "2"; }
+        }
 
         private string _supplySourcesCodesFileName = "SupplySources_CommonProductCodes.txt";
         private Dictionary<string[], string[]> _productsSupplySources;
@@ -23,11 +25,8 @@ namespace CapiControls.Controls.Controls.Form3
             IRemoteUnitOfWork uow,
             IInterviewService interviewService,
             IQuestionnaireService questionnaireSerivce,
-            IHostingEnvironment hostEnv) : base(questionnaireSerivce, hostEnv)
-        {
-            _uow = uow;
-            _interviewService = interviewService;
-        }
+            IHostingEnvironment hostEnv) : base(uow, questionnaireSerivce, interviewService, hostEnv)
+        { }
 
         public string Execute(string questionnaireId, string region = null)
         {
@@ -51,15 +50,15 @@ namespace CapiControls.Controls.Controls.Form3
             if (_productsSupplySources == null || _productsSupplySources.Count <= 0)
                 ReadProductsSupplySourcesFromFile(BuildFilePath(CatalogsDirectory, _supplySourcesCodesFileName));
 
-            var interviews = _interviewService.CollectInterviews(
-                _uow.Form3Repository.GetF3R2SupplySourcesInterviewsData(parameters)
+            var interviews = InterviewService.CollectInterviews(
+                Uow.Form3Repository.GetF3R2SupplySourcesInterviewsData(parameters)
             );
 
             if (interviews.Count > 0)
             {
                 using (var file = DocX.Load(_reportFilePath))
                 {
-                    string productCode, supplySource, hhCode, key;
+                    string productCode, supplySource, error;
                     string[] productSupplyCodes;
                     Product product;
 
@@ -73,16 +72,22 @@ namespace CapiControls.Controls.Controls.Form3
 
                             if (product != null)
                             {
-                                productSupplyCodes = _productsSupplySources.Where(p => p.Value.Contains(product.GskpCode)).FirstOrDefault().Key;
+                                productSupplyCodes = _productsSupplySources.Where(sp => sp.Value.Contains(product.GskpCode)).FirstOrDefault().Key;
 
-                                if (!productSupplyCodes.Contains(supplySource))
+                                if (productSupplyCodes.Count() > 0 && !productSupplyCodes.Contains(supplySource))
                                 {
-                                    // todo write error to the report file
+                                    error = $"{product.Name} (источник поступления)";
+                                    base.WriteErrorToFile(file, interview.Id, error, SectionNumber);
                                 }
                             }
                         }
                     }
+
+                    file.Save();
                 }
+
+                parameters.Offset += 1000;
+                Execute(parameters);
             }
         }
 

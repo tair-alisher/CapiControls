@@ -10,18 +10,17 @@ namespace CapiControls.Controls.Controls.Form3
 {
     public class F3R1UnitsControl : BaseControl, IF3R1UnitsControl
     {
-        private readonly IRemoteUnitOfWork _uow;
-        private readonly IInterviewService _interviewService;
+        protected override string SectionNumber
+        {
+            get { return "1"; }
+        }
 
         public F3R1UnitsControl(
             IRemoteUnitOfWork uow,
             IInterviewService interviewService,
             IQuestionnaireService questionnaireService,
-            IHostingEnvironment hostEnv) : base(questionnaireService, hostEnv)
-        {
-            _uow = uow;
-            _interviewService = interviewService;
-        }
+            IHostingEnvironment hostEnv) : base(uow, questionnaireService, interviewService, hostEnv)
+        { }
 
         public string Execute(string questionnaireId, string region = null)
         {
@@ -37,23 +36,23 @@ namespace CapiControls.Controls.Controls.Form3
         {
             ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
 
-            var rawInterviewsData = _uow.Form3Repository
+            var rawInterviewsData = Uow.Form3Repository
                 .GetF3R1UnitsInterviewsData(questionnaireId, offset, limit, region)
                 .ToList();
-            var interviews = _interviewService.CollectInterviews(rawInterviewsData);
+            var interviews = InterviewService.CollectInterviews(rawInterviewsData);
 
             if (!(interviews.Count <= 0))
             {
                 using (var file = DocX.Load(_reportFilePath))
                 {
-                    string productCode, unit, hhCode, key;
+                    string productCode, unit, error;
                     Product product;
 
                     foreach (var interview in interviews)
                     {
                         foreach (var questionData in interview.QuestionData)
                         {
-                            productCode = _interviewService.GetQuestionAnswerBySection(
+                            productCode = InterviewService.GetQuestionAnswerBySection(
                                 interview.Id, "tovKod", questionData.QuestionSection
                             );
 
@@ -63,15 +62,8 @@ namespace CapiControls.Controls.Controls.Form3
 
                             if (product != null && !product.Units.Contains(unit))
                             {
-                                hhCode = _interviewService.GetQuestionFirstAnswer(interview.Id, "hhCode");
-                                key = _interviewService.GetInterviewKey(interview.Id);
-
-                                file.InsertParagraph($"{FormString}: {_questionnaireTitle}.");
-                                file.InsertParagraph($"{IdentifierString}: {key}.");
-                                file.InsertParagraph($"{SectionString}: 1.");
-                                file.InsertParagraph($"{HouseholdCodeString}: {hhCode}.");
-                                file.InsertParagraph($"{ErrorString}: {product.Name} (единицы измерения).");
-                                file.InsertParagraph();
+                                error = $"{product.Name} (единицы измерения)";
+                                base.WriteErrorToFile(file, interview.Id, error, SectionNumber);
                             }
                         }
                     }
