@@ -33,6 +33,4 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 
-CapiControls/appsettings.json
-CapiControls/Files/*
-CapiControls.Web/Files/*
+CapiControls.Web/Files/Reports
