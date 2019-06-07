@@ -55,7 +55,7 @@ namespace CapiControls.BLL.Services
             );
         }
 
-        protected List<InterviewDTO> CollectInterviews(IEnumerable<RawInterviewData> rawData)
+        public List<InterviewDTO> CollectInterviews(IEnumerable<RawInterviewData> rawData)
         {
             var interviews = new List<InterviewDTO>();
             InterviewDTO interview = null;
