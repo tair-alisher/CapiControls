@@ -74,9 +74,18 @@ namespace CapiControls.Controls.Controls.Form3
                             {
                                 productSupplyCodes = _productsSupplySources.Where(sp => sp.Value.Contains(product.GskpCode)).FirstOrDefault().Key;
 
-                                if (productSupplyCodes.Count() > 0 && !productSupplyCodes.Contains(supplySource))
+                                // try..catch пока справочник не будет полность сформирован,
+                                // пока все необходимые продукты и их источники поступлений не будут добавлены
+                                try
                                 {
-                                    error = $"{product.Name} (источник поступления)";
+                                    if (productSupplyCodes.Count() > 0 && !productSupplyCodes.Contains(supplySource))
+                                    {
+                                        error = $"{product.Name} (источник поступления)";
+                                        base.WriteErrorToFile(file, interview.Id, error, SectionNumber);
+                                    }
+                                } catch (System.ArgumentNullException)
+                                {
+                                    error = $"Продукт {product.Name} ({product.GskpCode}) не найден в справочнике источников поступлений";
                                     base.WriteErrorToFile(file, interview.Id, error, SectionNumber);
                                 }
                             }

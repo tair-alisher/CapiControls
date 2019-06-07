@@ -12,36 +12,46 @@ namespace CapiControls.DAL.Repositories.Remote
     {
         public Form3Repository(IDbTransaction transaction) : base(transaction) { }
 
-        public IEnumerable<RawInterviewData> GetF3R1UnitsInterviewsData(string questionnaireId, int offset, int limit, string region = null)
+        public IEnumerable<RawInterviewData> GetF3R1UnitsInterviewsData(QueryParams parameters)
         {
             string query = base.DefaultSelect
                 + base.DefaultFrom
-                + (region == null ? base.DefaultWhere : base.RegionWhere)
+                + (parameters.Region == null ? base.DefaultWhere : base.RegionWhere)
                 + "and question_entity.stata_export_caption = 'f3r1q6'\n"
                 + base.DefaultOrder
                 + base.DefaultOffsetLimit;
 
             var rawData = Connection.Query<RawInterviewData>(
                 query,
-                param: new { questionnaireId, region, offset, limit },
+                param: new {
+                    questionnaireId = parameters.QuestionnaireId,
+                    region = parameters.Region,
+                    offset = parameters.Offset,
+                    limit = parameters.Limit
+                },
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 
             return rawData;
         }
 
-        public IEnumerable<RawInterviewData> GetF3R2UnitsInterviewsData(string questionnaireId, int offset, int limit, string region = null)
+        public IEnumerable<RawInterviewData> GetF3R2UnitsInterviewsData(QueryParams parameters)
         {
             string query = base.DefaultSelect
                 + base.DefaultFrom
-                + (region == null ? base.DefaultWhere : base.RegionWhere)
+                + (parameters.Region == null ? base.DefaultWhere : base.RegionWhere)
                 + "and (question_entity.stata_export_caption like 'f3r2q5b%' or question_entity.stata_export_caption = 'f3r2nenaideno')\n"
                 + base.DefaultOrder
                 + base.DefaultOffsetLimit;
 
             var rawData = Connection.Query<RawInterviewData>(
                 query,
-                param: new { questionnaireId, region, offset, limit },
+                param: new {
+                    questionnaireId = parameters.QuestionnaireId,
+                    region = parameters.Region,
+                    offset = parameters.Offset,
+                    limit = parameters.Limit
+                },
                 transaction: Transaction
             ) ?? Enumerable.Empty<RawInterviewData>();
 

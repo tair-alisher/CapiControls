@@ -3,6 +3,7 @@ using CapiControls.BLL.Exceptions;
 using CapiControls.BLL.Interfaces;
 using CapiControls.Controls.Common;
 using CapiControls.Controls.Interfaces.Form1;
+using CapiControls.DAL.Common;
 using CapiControls.DAL.Interfaces.Units;
 using Microsoft.AspNetCore.Hosting;
 using Novacode;
@@ -32,50 +33,38 @@ namespace CapiControls.Controls.Controls.Form1
             _reportFilePath = CreateReportFile("F1R2HhMembers");
             _questionnaireTitle = GetQuestionnaireTitle(questionnaireId);
 
-            await Execute(questionnaireId, region, 0, 1000);
+            await Execute(new QueryParams
+            {
+                QuestionnaireId = questionnaireId,
+                Region = region
+            });
 
             return _reportFilePath;
         }
 
-        private async Task Execute(string questionnaireId, string region = null, int offset = 0, int limit = 1000)
+        private async Task Execute(QueryParams parameters)
         {
-            var rawInterviewsData = Uow.Form1Repository
-                .GetF1R2Interviews(questionnaireId, offset, limit, region)
-                .ToList();
-
-            var iterationData = new IterationData
-            {
-                QuestionnaireId = questionnaireId,
-                Region = region,
-                Offset = offset,
-                Limit = limit
-            };
-
-            await CheckInterviews(iterationData);
-        }
-
-        private async Task CheckInterviews(IterationData iterationData)
-        {
-            var interviews = FormInterviews(iterationData);
+            var interviews = base.InterviewService.CollectInterviews(
+                Uow.Form1Repository.GetF1R2Interviews(parameters)
+            );
 
             if (interviews.Count <= 0)
                 return;
 
             using (var file = DocX.Load(_reportFilePath))
             {
-                foreach (var interview in interviews)
-                    await CheckInterview(interview, file);
-
+                await CheckInterviews(interviews, file);
                 file.Save();
             }
 
-            await Execute(iterationData.QuestionnaireId, iterationData.Region, iterationData.Offset += 1000);
+            parameters.Offset += 1000;
+            await Execute(parameters);
         }
 
-        private List<InterviewDTO> FormInterviews(IterationData iterationData)
+        private async Task CheckInterviews(List<InterviewDTO> interviews, DocX file)
         {
-            return base.InterviewService.CollectInterviews(
-                Uow.Form1Repository.GetF1R2Interviews(iterationData.QuestionnaireId, iterationData.Offset, iterationData.Limit, iterationData.Region));
+            foreach (var interview in interviews)
+                await CheckInterview(interview, file);
         }
 
         private async Task CheckInterview(InterviewDTO interview, DocX file)
@@ -86,7 +75,7 @@ namespace CapiControls.Controls.Controls.Form1
                 error = await CheckAnswer(interview, questionData);
 
                 if (!string.IsNullOrEmpty(error))
-                    WriteErrorToFile(file, interview.Id, error, SectionNumber);
+                    base.WriteErrorToFile(file, interview.Id, error, SectionNumber);
             }
         }
 
@@ -119,6 +108,7 @@ namespace CapiControls.Controls.Controls.Form1
 
             return error;
         }
+
         private async Task<string> CheckHeadMaritalStatus(string interviewId, string memberName, string questionSection)
         {
             var error = "";
