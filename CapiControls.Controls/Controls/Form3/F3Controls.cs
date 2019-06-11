@@ -8,7 +8,10 @@ namespace CapiControls.Controls.Controls.Form3
         private readonly IF3R2UnitsControl _f3R2UnitsControl;
         private readonly IF3R2SupplySourcesControl _f3R2SupplySourcesControl;
 
-        public F3Controls(IF3R1UnitsControl f3R1UnitsContorl, IF3R2UnitsControl f3R2UnitsControl, IF3R2SupplySourcesControl f3R2SupplySourcesControl)
+        public F3Controls(
+            IF3R1UnitsControl f3R1UnitsContorl,
+            IF3R2UnitsControl f3R2UnitsControl,
+            IF3R2SupplySourcesControl f3R2SupplySourcesControl)
         {
             _f3R1UnitsControl = f3R1UnitsContorl;
             _f3R2UnitsControl = f3R2UnitsControl;

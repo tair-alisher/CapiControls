@@ -14,6 +14,7 @@ namespace CapiControls.Controls.Controls
     {
         protected abstract string SectionNumber { get; }
         internal List<Product> Products = null;
+        internal List<NonFoodItem> NonFoodItems = null;
 
         protected string _reportFilePath;
         protected string _questionnaireTitle;
@@ -22,6 +23,7 @@ namespace CapiControls.Controls.Controls
         protected const string CatalogsDirectory = "Catalogs";
 
         protected const string ProdInfoFileName = "ProdUnits.txt";
+        protected const string NeprodInfoFileName = "Neprod.txt";
 
         protected readonly IRemoteUnitOfWork Uow;
         protected readonly IQuestionnaireService QuestionnaireService;
@@ -46,7 +48,7 @@ namespace CapiControls.Controls.Controls
             return Path.Combine(rootDir, "Files", directory, fileName);
         }
 
-        protected virtual void ReadProdInfoFromFile(string filePath)
+        protected void ReadProdInfoFromFile(string filePath)
         {
             Products = new List<Product>();
 
@@ -54,21 +56,54 @@ namespace CapiControls.Controls.Controls
             {
                 using (var reader = new StreamReader(fileStream))
                 {
-                    string line, code, gskpCode, name;
-                    string[] lineParts, units;
+                    string line;
+                    string[] lineParts;
                     Product product;
 
                     while ((line = reader.ReadLine()) != null)
                     {
                         lineParts = line.Split(';');
-
-                        code = lineParts[0];
-                        name = lineParts[1];
-                        gskpCode = lineParts[2];
-                        units = lineParts[3].Split('/');
-                        product = new Product(code, name, gskpCode, units);
+                        product = new Product
+                        {
+                            Code = lineParts[0],
+                            Name = lineParts[1],
+                            GskpCode = lineParts[2],
+                            Units = lineParts[3].Split('/')
+                        };
 
                         Products.Add(product);
+                    }
+                }
+            }
+        }
+
+        protected void ReadNonFoodItemsInfoFromFile(string filePath)
+        {
+            NonFoodItems = new List<NonFoodItem>();
+
+            using (var fileStream = File.OpenRead(filePath))
+            {
+                using (var reader = new StreamReader(fileStream))
+                {
+                    string line;
+                    string[] lineParts;
+                    NonFoodItem item;
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        lineParts = line.Split(';');
+                        item = new NonFoodItem
+                        {
+                            Code = lineParts[0],
+                            Name = lineParts[1],
+                            GskpCode = lineParts[2],
+                            Units = lineParts[3].Split(null),
+                            Materials = lineParts[5].Split(null),
+                            Purposes = lineParts[7].Split(null)
+                        };
+
+                        NonFoodItems.Add(item);
+
                     }
                 }
             }

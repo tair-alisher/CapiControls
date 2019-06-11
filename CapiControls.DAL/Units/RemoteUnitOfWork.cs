@@ -7,8 +7,9 @@ namespace CapiControls.DAL.Units
     public class RemoteUnitOfWork : UnitOfWork, IRemoteUnitOfWork
     {
         private IInterviewRepository _interviewRepository;
-        private IForm3Repository _form3Repository;
         private IForm1Repository _form1Repository;
+        private IForm3Repository _form3Repository;
+        private IForm5Repository _form5Repository;
 
         public RemoteUnitOfWork(string connectionString) : base(connectionString) { }
 
@@ -20,6 +21,14 @@ namespace CapiControls.DAL.Units
             }
         }
 
+        public IForm1Repository Form1Repository
+        {
+            get
+            {
+                return _form1Repository ?? (_form1Repository = new Form1Repository(Transaction));
+            }
+        }
+
         public IForm3Repository Form3Repository
         {
             get
@@ -28,11 +37,11 @@ namespace CapiControls.DAL.Units
             }
         }
 
-        public IForm1Repository Form1Repository
+        public IForm5Repository Form5Repository
         {
             get
             {
-                return _form1Repository ?? (_form1Repository = new Form1Repository(Transaction));
+                return _form5Repository ?? (_form5Repository = new Form5Repository(Transaction));
             }
         }
 
