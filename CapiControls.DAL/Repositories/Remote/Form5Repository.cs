@@ -15,7 +15,6 @@ namespace CapiControls.DAL.Repositories.Remote
         {
             string query = $@"select
     summary.summaryid as InterviewId
-    , summary.questionnaireidentity as QuestionnaireId
     , summary.teamleadname as Region
     , coalesce(
         interview.asstring
@@ -58,8 +57,8 @@ namespace CapiControls.DAL.Repositories.Remote
                 param: new
                 {
                     questionnaireId = parameters.QuestionnaireId,
-                    offset = parameters.Offset,
                     region = parameters.Region,
+                    offset = parameters.Offset,
                     limit = parameters.Limit
                 },
                 transaction: Transaction

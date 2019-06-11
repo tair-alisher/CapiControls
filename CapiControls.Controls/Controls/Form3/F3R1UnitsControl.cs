@@ -1,5 +1,5 @@
-﻿using CapiControls.BLL.DTO;
-using CapiControls.BLL.Interfaces;
+﻿using CapiControls.BLL.Interfaces;
+using CapiControls.Controls.Common;
 using CapiControls.Controls.Interfaces.Form3;
 using CapiControls.DAL.Common;
 using CapiControls.DAL.Interfaces.Units;
@@ -43,16 +43,14 @@ namespace CapiControls.Controls.Controls.Form3
             if (Products == null || Products.Count <= 0)
                 ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
 
-            var interviews = InterviewService.CollectInterviews(
-                Uow.Form3Repository.GetF3R1UnitsInterviewsData(parameters)
-            );
+            var answers = Uow.Form3Repository.GetF3R1InterviewsData(parameters);
 
-            if (interviews.Count <= 0)
+            if (answers.Count <= 0)
                 return;
 
             using (var file = DocX.Load(_reportFilePath))
             {
-                CheckInterviews(interviews, file);
+                CheckAnswers(answers, file);
                 file.Save();
             }
 
@@ -60,30 +58,18 @@ namespace CapiControls.Controls.Controls.Form3
             Execute(parameters);
         }
 
-        private void CheckInterviews(List<InterviewDTO> interviews, DocX file)
+        private void CheckAnswers(List<F3AnswerData> answers, DocX file)
         {
-            foreach (var interview in interviews)
-                CheckInterview(interview, file);
-        }
-
-        private void CheckInterview(InterviewDTO interview, DocX file)
-        {
-            foreach (var questionData in interview.QuestionData)
-                CheckAnswer(interview.Id, questionData, file);
-        }
-
-        private void CheckAnswer(string interviewId, QuestionDataDTO questionData, DocX file)
-        {
-            string productCode = InterviewService.GetQuestionAnswerBySection(
-                    interviewId, "tovKod", questionData.QuestionSection
-                );
-            string unit = questionData.Answer;
-            var product = Products.Where(p => p.Code == productCode).FirstOrDefault();
-
-            if (product != null && !product.Units.Contains(unit))
+            string error;
+            Product product;
+            foreach (var answer in answers)
             {
-                string error = $"{product.Name} (единицы измерения)";
-                base.WriteErrorToFile(file, interviewId, error, SectionNumber);
+                product = Products.Where(p => p.Code == answer.ProductCode).FirstOrDefault();
+                if (product != null && !product.Units.Contains(answer.ProductUnits))
+                {
+                    error = $"{product.Name} (единицы измерения)";
+                    base.WriteErrorToFile(file, answer.InterviewId, error, SectionNumber);
+                }
             }
         }
     }

@@ -50,53 +50,47 @@ namespace CapiControls.Controls.Controls.Form3
             if (_productsSupplySources == null || _productsSupplySources.Count <= 0)
                 ReadProductsSupplySourcesFromFile(BuildFilePath(CatalogsDirectory, _supplySourcesCodesFileName));
 
-            var interviews = InterviewService.CollectInterviews(
-                Uow.Form3Repository.GetF3R2SupplySourcesInterviewsData(parameters)
-            );
+            var answers = Uow.Form3Repository.GetF3R2InterviewsData(parameters);
 
-            if (interviews.Count > 0)
+            if (answers.Count <= 0)
+                return;
+
+            using (var file = DocX.Load(_reportFilePath))
             {
-                using (var file = DocX.Load(_reportFilePath))
+                CheckAnswers(answers, file);
+                file.Save();
+            }
+
+            parameters.Offset += 1000;
+            Execute(parameters);
+        }
+
+        private void CheckAnswers(List<F3AnswerData> answers, DocX file)
+        {
+            string error;
+            Product product;
+            foreach (var answer in answers)
+            {
+                product = Products.Where(p => p.Code == answer.ProductCode).FirstOrDefault();
+                if (product != null)
                 {
-                    string productCode, supplySource, error;
-                    string[] productSupplyCodes;
-                    Product product;
+                    // допустимые для продукта источники поступления
+                    var productSupplyCodes = _productsSupplySources.Where(sp => sp.Value.Contains(product.GskpCode)).FirstOrDefault().Key;
 
-                    foreach (var interview in interviews)
+                    try
                     {
-                        foreach (var questionData in interview.QuestionData)
+                        if (productSupplyCodes.Count() > 0 && !productSupplyCodes.Contains(answer.ProductSupplySource))
                         {
-                            productCode = questionData.QuestionSection.Split('_')[1];
-                            supplySource = questionData.Answer;
-                            product = Products.Where(p => p.Code == productCode).FirstOrDefault();
-
-                            if (product != null)
-                            {
-                                productSupplyCodes = _productsSupplySources.Where(sp => sp.Value.Contains(product.GskpCode)).FirstOrDefault().Key;
-
-                                // try..catch пока справочник не будет полность сформирован,
-                                // пока все необходимые продукты и их источники поступлений не будут добавлены
-                                try
-                                {
-                                    if (productSupplyCodes.Count() > 0 && !productSupplyCodes.Contains(supplySource))
-                                    {
-                                        error = $"{product.Name} (источник поступления)";
-                                        base.WriteErrorToFile(file, interview.Id, error, SectionNumber);
-                                    }
-                                } catch (System.ArgumentNullException)
-                                {
-                                    error = $"Продукт {product.Name} ({product.GskpCode}) не найден в справочнике источников поступлений";
-                                    base.WriteErrorToFile(file, interview.Id, error, SectionNumber);
-                                }
-                            }
+                            error = $"{product.Name} (источник поступления)";
+                            base.WriteErrorToFile(file, answer.InterviewId, error, SectionNumber);
                         }
                     }
-
-                    file.Save();
+                    catch (System.ArgumentNullException)
+                    {
+                        error = $"Продукт {product.Name} ({product.GskpCode}) не найден в справочнике источников поступлений";
+                        base.WriteErrorToFile(file, answer.InterviewId, error, SectionNumber);
+                    }
                 }
-
-                parameters.Offset += 1000;
-                Execute(parameters);
             }
         }
 

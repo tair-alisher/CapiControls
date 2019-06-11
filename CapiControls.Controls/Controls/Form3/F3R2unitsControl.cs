@@ -1,5 +1,4 @@
-﻿using CapiControls.BLL.DTO;
-using CapiControls.BLL.Interfaces;
+﻿using CapiControls.BLL.Interfaces;
 using CapiControls.Controls.Interfaces.Form3;
 using CapiControls.DAL.Common;
 using CapiControls.DAL.Interfaces.Units;
@@ -10,14 +9,14 @@ using System.Linq;
 
 namespace CapiControls.Controls.Controls.Form3
 {
-    public class F3R2unitsControl : BaseControl, IF3R2UnitsControl
+    public class F3R2UnitsControl : BaseControl, IF3R2UnitsControl
     {
         protected override string SectionNumber
         {
             get { return "2"; }
         }
 
-        public F3R2unitsControl(
+        public F3R2UnitsControl(
             IRemoteUnitOfWork uow,
             IInterviewService interviewService,
             IQuestionnaireService questionnaireService,
@@ -42,17 +41,15 @@ namespace CapiControls.Controls.Controls.Form3
         {
             if (Products == null || Products.Count <= 0)
                 ReadProdInfoFromFile(BuildFilePath(CatalogsDirectory, ProdInfoFileName));
-            
-            var interviews = InterviewService.CollectInterviews(
-                Uow.Form3Repository.GetF3R2UnitsInterviewsData(parameters)
-            );
 
-            if (interviews.Count <= 0)
+            var answers = Uow.Form3Repository.GetF3R2InterviewsData(parameters);
+
+            if (answers.Count <= 0)
                 return;
 
             using (var file = DocX.Load(_reportFilePath))
             {
-                CheckInterviews(interviews, file);
+                CheckAnswers(answers, file);
                 file.Save();
             }
 
@@ -60,28 +57,20 @@ namespace CapiControls.Controls.Controls.Form3
             Execute(parameters);
         }
 
-        private void CheckInterviews(List<InterviewDTO> interviews, DocX file)
+        private void CheckAnswers(List<F3AnswerData> answers, DocX file)
         {
-            foreach (var interview in interviews)
-                CheckInterview(interview, file);
-        }
-
-        private void CheckInterview(InterviewDTO interview, DocX file)
-        {
-            foreach (var questionData in interview.QuestionData)
-                CheckAnswer(interview.Id, questionData, file);
-        }
-
-        private void CheckAnswer(string interviewId, QuestionDataDTO questionData, DocX file)
-        {
-            string productCode = questionData.QuestionSection.Split('_')[1];
-            string unit = questionData.Answer;
-            var product = Products.Where(p => p.Code == productCode).FirstOrDefault();
-
-            if (product != null && !product.Units.Contains(unit))
+            string error;
+            foreach (var answer in answers)
             {
-                string error = $"{product.Name} (единицы измерения)";
-                base.WriteErrorToFile(file, interviewId, error, SectionNumber);
+                var product = Products.Where(p => p.Code == answer.ProductCode).FirstOrDefault();
+                if (product != null)
+                {
+                    if (!product.Units.Contains(answer.ProductUnits))
+                    {
+                        error = $"{product.Name} (единицы измерения)";
+                        base.WriteErrorToFile(file, answer.InterviewId, error, SectionNumber);
+                    }
+                }
             }
         }
     }
